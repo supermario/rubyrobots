@@ -1,9 +1,25 @@
 GIT
+  remote: https://github.com/4r2r/opal-sprockets.git
+  revision: fd0c67a4f078d771d70220281ff3ecb0db6f8822
+  specs:
+    opal-sprockets (0.3.0)
+      opal
+      sprockets
+
+GIT
   remote: https://github.com/opal/opal-browser.git
   revision: a1baca0a737ebb32b427b6e4c32b3746051d361e
   specs:
     opal-browser (0.1.0)
       opal (>= 0.4.3)
+
+GIT
+  remote: https://github.com/opal/opal.git
+  revision: 5f9c5e004c5494425607ea15407080a72b3c5990
+  specs:
+    opal (0.6.0)
+      source_map
+      sprockets
 
 GEM
   remote: https://rubygems.org/
@@ -11,11 +27,6 @@ GEM
     hike (1.2.3)
     json (1.8.1)
     multi_json (1.8.2)
-    opal (0.5.5)
-      source_map
-    opal-sprockets (0.3.0)
-      opal (~> 0.5.0)
-      sprockets
     rack (1.5.2)
     source_map (3.0.1)
       json
@@ -30,6 +41,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  opal
+  opal!
   opal-browser!
-  opal-sprockets
+  opal-sprockets!

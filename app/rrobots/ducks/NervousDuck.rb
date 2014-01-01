@@ -1,5 +1,3 @@
-require 'robot'
-
 class NervousDuck
    include Robot
 
@@ -8,6 +6,6 @@ class NervousDuck
     turn_gun 30 if time < 3
     accelerate 1
     turn 2
-    fire 3 unless events['robot_scanned'].empty? 
+    fire 3 unless events['robot_scanned'].empty?
   end
 end

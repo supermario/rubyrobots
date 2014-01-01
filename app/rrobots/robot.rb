@@ -1,3 +1,9 @@
+module Math
+  def hypot(x, y)
+    sqrt(x * x + y * y)
+  end
+end
+
 module Robot
 
   def self.attr_state(*names)
@@ -82,7 +88,7 @@ module Robot
 
   #accelerates negativ if moving forward (and vice versa), may take 8 ticks to stop (and you have to call it every tick)
   def stop
-    accelerate((speed > 0) ? -1 : ((speed < 0) ? 1 :0))
+    accelerate((speed > 0) ? -1 : ((speed < 0) ? 1 : 0))
   end
 
   #fires a bullet in the direction of your gun, power is 0.1 - 3, this power is taken from your energy
@@ -259,8 +265,10 @@ class RobotRunner
       @robot.send("#{k}=", v)
     }
     @robot.events = @events.dup
-    @robot.actions ||= Hash.new(0)
-    @robot.actions.clear
+
+    # @robot.actions ||= Hash.new(0)
+    # @robot.actions.clear
+    @robot.actions = Hash.new(0)
   end
 
   def robot_tick
@@ -344,7 +352,8 @@ class RobotRunner
   end
 
   def to_s
-    @robot.class.name
+    # @robot.class.name
+    object_id.to_s
   end
 
   def name

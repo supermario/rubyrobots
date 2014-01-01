@@ -1,19 +1,18 @@
-require 'tk'
-require 'base64'
-
 TkRobot = Struct.new(:body, :gun, :radar, :speech, :info, :status)
 
 class TkArena
 
   attr_reader :battlefield, :xres, :yres
   attr_accessor :speed_multiplier, :on_game_over_handlers
-  attr_accessor :canvas, :boom, :robots, :bullets, :explosions, :colors
+  attr_accessor :canvas, :boom, :robots, :bullets, :explosions, :colors, :team_colors
   attr_accessor :default_skin_prefix
 
   def initialize battlefield, xres, yres, speed_multiplier
+    @native_window ||= Native `window`
     @battlefield = battlefield
     @xres, @yres = xres, yres
     @speed_multiplier = speed_multiplier
+    @team_colors = [['#d00', '#900'], ['#77f', '#337']]
     @text_colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff', '#777777']
     @default_skin_prefix = "images/red_"
     @on_game_over_handlers = []
@@ -47,35 +46,24 @@ class TkArena
   end
 
   def init_canvas
-    @canvas = TkCanvas.new(:height=>yres, :width=>xres, :scrollregion=>[0, 0, xres, yres], :background => '#000000').pack
-    @colors = []
-    [[0,1,1],[1,0,1],[1,1,0],[0,0,1],[1,0,0],[0,1,0],[0,0,0],[1,1,1]][0...@battlefield.robots.length].zip(@battlefield.robots) do |color, robot|
-      bodies, guns, radars = [], [], []
-      image_path = robot.skin_prefix || @default_skin_prefix
-      reader = robot.skin_prefix ? lambda{|fn| TkPhotoImage.new(:file => fn) } : lambda{|fn| read_gif(fn, *color)}
-      36.times do |i|
-        bodies << reader["#{image_path}body#{(i*10).to_s.rjust(3, '0')}.gif"]
-        guns << reader["#{image_path}turret#{(i*10).to_s.rjust(3, '0')}.gif"]
-        radars << reader["#{image_path}radar#{(i*10).to_s.rjust(3, '0')}.gif"]
-      end
-      @colors << TkRobot.new(bodies << bodies[0], guns << guns[0], radars << radars[0])
-    end
-
-    @boom = (0..14).map do |i|
-      TkPhotoImage.new(:file => "images/explosion#{i.to_s.rjust(2, '0')}.gif")
-    end
+    options = {
+      width: xres,
+      height: yres
+    }
+    @two = Native `new Two(#{options})`
+    @two.appendTo $document.body
+    # rect = @two.makeRectangle 200, 200, 20, 30
+    # rect.fill = '#00f'
+    # rect.rotation = (60.0 / 180.0) * Math::PI
+    # circle = two.makeCircle 72, 100, 50
+    # circle.fill = '#ff8000'
+    # circle.stroke = 'orangered'
+    # circle.linewidth = 5
+    # two.update
   end
 
   def init_simulation
     @robots, @bullets, @explosions = {}, {}, {}
-    TkTimer.new(20, -1, Proc.new{
-      begin
-        draw_frame
-      rescue => err
-        puts err.class, err, err.backtrace
-        raise
-      end
-    }).start
   end
 
   def draw_frame
@@ -84,19 +72,23 @@ class TkArena
   end
 
   def simulate(ticks=1)
-    @explosions.reject!{|e,tko| @canvas.delete(tko) if e.dead; e.dead }
-    @bullets.reject!{|b,tko| @canvas.delete(tko) if b.dead; b.dead }
-    @robots.reject! do |ai,tko|
+    @explosions = @explosions.reject{|e,tko| tko.remove if e.dead; e.dead }
+    @bullets = @bullets.reject{|b,tko| tko.remove if b.dead; b.dead }
+    @robots = @robots.reject do |ai,tko|
       if ai.dead
-        tko.status.configure(:text => "#{ai.name.ljust(20)} dead")
-        tko.each{|part| @canvas.delete(part) if part != tko.status}
+        # tko.status.configure(:text => "#{ai.name.ljust(20)} dead")
+        tko.body.fill = '#777'
+        tko.gun.fill = '#777'
+        tko.radar.remove
+        # tko.each{|part| part.remove if part != tko.status}
         true
       end
     end
     ticks.times do
       if @battlefield.game_over
+        @native_window.clearInterval @interval
         @on_game_over_handlers.each{|h| h.call(@battlefield) }
-        unless @game_over
+        unless true # @game_over
           winner = @robots.keys.first
           whohaswon = if winner.nil?
             "Draw!"
@@ -108,7 +100,7 @@ class TkArena
           text_color = winner ? winner.team : 7
           @game_over = TkcText.new(canvas,
             :fill => @text_colors[text_color],
-            :anchor => 'c', :coords => [400,400], :font=>'courier 36', :justify => 'center',
+            :anchor => 'c', :coords => [400, 400], :font => 'courier 36', :justify => 'center',
             :text => "GAME OVER\n#{whohaswon}")
         end
       end
@@ -119,12 +111,83 @@ class TkArena
   def draw_battlefield
     draw_robots
     draw_bullets
-    draw_explosions
+    # draw_explosions
+
+    @two.update
   end
 
   def draw_robots
     @battlefield.robots.each_with_index do |ai, i|
       next if ai.dead
+
+      if @robots[ai]
+        robot = @robots[ai]
+      else
+        robot = TkRobot.new
+        @robots[ai] = robot
+
+        size = ai.size / 2
+        scale = size / 16.0
+        width = 16.0 / size
+        longest_line = Math::hypot(xres, yres)
+        primary_color = @team_colors[ai.team].first
+        secondary_color = @team_colors[ai.team].last
+
+        radar = @two.makeLine 0, 0, 0, longest_line
+        radar.translation.set 0, -longest_line / 2
+
+        radar_group = @two.makeGroup radar
+        radar_group.stroke = '#ddd'
+        radar_group.linewidth = 2
+
+        left_track = @two.makeRectangle -6, 0, 4, 16
+        right_track = @two.makeRectangle 6, 0, 4, 16
+        left_track.fill = right_track.fill = '#aaa'
+
+        body = @two.makePolygon -4, -7,
+          0, -9,
+          4, -7,
+          4, 7,
+          -4, 7
+        body.fill = secondary_color
+
+        body_group = @two.makeGroup left_track, right_track, body
+        body_group.scale = scale
+        body_group.linewidth = 2 * width
+
+        turret = @two.makePolygon -4, -4,
+          0, -6,
+          4, -4,
+          4, 4,
+          -4, 4
+        turret.fill = primary_color
+
+        gun = @two.makeRectangle 0, -10, 2, 8
+        gun.fill = '#ddd'
+
+        gun_group = @two.makeGroup turret, gun
+        gun_group.scale = scale
+        gun_group.linewidth = 2 * width
+
+        robot.body = body_group
+        robot.gun = gun_group
+        robot.radar = radar_group
+      end
+
+      # robot.body.rotation = 0
+      # robot.body.translation.set 0, 0
+      robot.body.rotation = (90 - ai.heading) / 180.0 * Math::PI
+      robot.body.translation.set ai.x / 2, ai.y / 2
+
+      robot.gun.rotation = (90 - ai.gun_heading) / 180.0 * Math::PI
+      robot.gun.translation.set ai.x / 2, ai.y / 2
+
+      robot.radar.translation.set ai.x / 2, ai.y / 2
+      robot.radar.rotation = (90 - ai.radar_heading) / 180.0 * Math::PI
+
+      if false
+
+      # Struct.new(:body, :gun, :radar, :speech, :info, :status)
       @robots[ai] ||= TkRobot.new(
         TkcImage.new(@canvas, 0, 0),
         TkcImage.new(@canvas, 0, 0),
@@ -138,6 +201,7 @@ class TkArena
         TkcText.new(@canvas,
         :fill => @text_colors[ai.team],
         :anchor => 'nw', :coords => [10, 15 * i + 10], :font => TkFont.new("courier 9")))
+
       @robots[ai].body.configure( :image => @colors[ai.team].body[(ai.heading+5) / 10],
                                   :coords => [ai.x / 2, ai.y / 2])
       @robots[ai].gun.configure(  :image => @colors[ai.team].gun[(ai.gun_heading+5) / 10],
@@ -149,17 +213,35 @@ class TkArena
       @robots[ai].info.configure(:text => "#{ai.name}\n#{'|' * (ai.energy / 5)}",
                                  :coords => [ai.x / 2, ai.y / 2 + ai.size / 2])
       @robots[ai].status.configure(:text => "#{ai.name.ljust(20)} #{'%.1f' % ai.energy}")
+
+      end
     end
   end
 
   def draw_bullets
     @battlefield.bullets.each do |bullet|
+      if @bullets[bullet]
+        bullet_circle = @bullets[bullet]
+      else
+        bullet_circle = @two.makeCircle 0, 0, 2.5
+        bullet_circle.fill = '#FF8000'
+        bullet_circle.stroke = '#FF4500'
+        bullet_circle.linewidth = 2
+
+        @bullets[bullet] = bullet_circle
+      end
+
+      bullet_circle.translation.x = bullet.x / 2
+      bullet_circle.translation.y = bullet.y / 2
+
+      if false
       @bullets[bullet] ||= TkcOval.new(
         @canvas, [-2, -2], [3, 3],
         :fill=>'#'+("%02x" % (128+bullet.energy*14).to_i)*3)
       @bullets[bullet].coords(
         bullet.x / 2 - 2, bullet.y / 2 - 2,
         bullet.x / 2 + 3, bullet.y / 2 + 3)
+      end
     end
   end
 
@@ -171,7 +253,7 @@ class TkArena
   end
 
   def run
-    Tk.mainloop
+    @interval = @native_window.setInterval proc { draw_frame }, 40
   end
 
 end
