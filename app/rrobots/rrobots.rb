@@ -1,4 +1,5 @@
 require './robot'
+require './ducks/NervousDuck'
 require './ducks/SittingDuck'
 require './ducks/Ente'
 require './tkarena'
@@ -198,7 +199,7 @@ speed_multiplier = 1
 timeout = 50000
 
 battlefield = Battlefield.new xres * 2, yres * 2, timeout, seed
-battlefield << RobotRunner.new(Ente.new, battlefield, 0)
-battlefield << RobotRunner.new(Ente.new, battlefield, 1)
+battlefield << RobotRunner.new(NervousDuck.new, battlefield, 0)
+battlefield << RobotRunner.new(SittingDuck.new, battlefield, 1)
 
 run_in_gui(battlefield, xres, yres, speed_multiplier)

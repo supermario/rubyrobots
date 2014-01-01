@@ -12,6 +12,17 @@ class TkArena
     @battlefield = battlefield
     @xres, @yres = xres, yres
     @speed_multiplier = speed_multiplier
+    @explosion_colors = [
+      '#f7c511',
+      '#f1b800',
+      '#ee9500',
+      '#e88302',
+      '#e67504',
+      '#db6903',
+      '#222',
+      '#333'
+    ]
+
     @team_colors = [['#d00', '#900'], ['#77f', '#337']]
     @text_colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff', '#777777']
     @default_skin_prefix = "images/red_"
@@ -22,19 +33,6 @@ class TkArena
 
   def on_game_over(&block)
     @on_game_over_handlers << block
-  end
-
-  def read_gif name, c1, c2, c3
-    data = nil
-    open(name, 'rb') do |f|
-      data = f.read()
-      ncolors = 2**(1 + data[10][0] + data[10][1] * 2 + data[10][2] * 4)
-      ncolors.times do |j|
-        data[13 + j * 3 + 0], data[13 + j * 3 + 1], data[13 + j * 3 + 2] =
-          data[13 + j * 3 + c1], data[13 + j * 3 + c2], data[13 + j * 3 + c3]
-      end
-    end
-    TkPhotoImage.new(:data => Base64.encode64(data))
   end
 
   def usage
@@ -52,14 +50,6 @@ class TkArena
     }
     @two = Native `new Two(#{options})`
     @two.appendTo $document.body
-    # rect = @two.makeRectangle 200, 200, 20, 30
-    # rect.fill = '#00f'
-    # rect.rotation = (60.0 / 180.0) * Math::PI
-    # circle = two.makeCircle 72, 100, 50
-    # circle.fill = '#ff8000'
-    # circle.stroke = 'orangered'
-    # circle.linewidth = 5
-    # two.update
   end
 
   def init_simulation
@@ -71,7 +61,7 @@ class TkArena
     draw_battlefield
   end
 
-  def simulate(ticks=1)
+  def simulate(ticks = 1)
     @explosions = @explosions.reject{|e,tko| tko.remove if e.dead; e.dead }
     @bullets = @bullets.reject{|b,tko| tko.remove if b.dead; b.dead }
     @robots = @robots.reject do |ai,tko|
@@ -111,7 +101,7 @@ class TkArena
   def draw_battlefield
     draw_robots
     draw_bullets
-    # draw_explosions
+    draw_explosions
 
     @two.update
   end
@@ -223,7 +213,7 @@ class TkArena
       if @bullets[bullet]
         bullet_circle = @bullets[bullet]
       else
-        bullet_circle = @two.makeCircle 0, 0, 2.5
+        bullet_circle = @two.makeCircle 0, 0, 2
         bullet_circle.fill = '#FF8000'
         bullet_circle.stroke = '#FF4500'
         bullet_circle.linewidth = 2
@@ -231,8 +221,7 @@ class TkArena
         @bullets[bullet] = bullet_circle
       end
 
-      bullet_circle.translation.x = bullet.x / 2
-      bullet_circle.translation.y = bullet.y / 2
+      bullet_circle.translation.set bullet.x / 2, bullet.y / 2
 
       if false
       @bullets[bullet] ||= TkcOval.new(
@@ -247,8 +236,26 @@ class TkArena
 
   def draw_explosions
     @battlefield.explosions.each do |explosion|
+
+      if @explosions[explosion]
+        explosion_circle = @explosions[explosion]
+      else
+        explosion_circle = @two.makeCircle 0, 0, 24
+        explosion_circle.opacity = 0.5
+        explosion_circle.fill = '#FF8000'
+        explosion_circle.linewidth = 0
+
+        @explosions[explosion] = explosion_circle
+      end
+
+      explosion_circle.translation.set explosion.x / 2, explosion.y / 2
+      explosion_circle.scale = (2 - Math::cos(explosion.t / 16.0 * Math::PI)) / 3
+      explosion_circle.fill = @explosion_colors[(explosion.t / 2).to_i]
+
+      if false
       @explosions[explosion] ||= TkcImage.new(@canvas, explosion.x / 2, explosion.y / 2)
       @explosions[explosion].image(boom[explosion.t])
+      end
     end
   end
 
