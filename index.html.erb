@@ -3,11 +3,54 @@
   <head>
     <title>opal-robots</title>
     <style type="text/css">
-      svg { background-image: url(tiles2.png); display:block; margin: auto; }
-      body { background-color: #ddd; margin: 0; }
+      body {
+        font-family: sans-serif;
+      }
+      a:visited {
+        color: #00e;
+      }
+      a:hover {
+        color: #e00;
+      }
+      #welcome, #log {
+        background-color: #f7f7f7;
+        border: 1px solid #e0e0e0;
+        padding: 1em;
+      }
+      #arena, #text {
+        float: left;
+      }
+      #text {
+        width: 390px;
+        margin-right: 10px;
+      }
+      #arena svg {
+        border: 1px solid #e0e0e0;
+        background-image: url("tiles.png");
+      }
     </style>
   </head>
   <body>
+    <div id="text">
+      <div id="welcome">
+        <h1>Hello.</h1>
+        <p>
+          This is in-browser version of
+          <a href="http://rrobots.rubyforge.org/">Ruby Robots</a>!
+        </p>
+        <p>
+          Feel free to check out some of the cool robot battles from the
+          <a href="http://rubyquiz.com/quiz59.html">Ruby Quiz</a>
+          <a href="#" target="_blank"> </a>
+          <br><br>- or -<br><br>
+          <a href="https://gist.github.com/">Create a gist</a>
+          with two robot programs and add it's id to the url after the hash, like
+          <a href="#">this</a>, for example.
+        </p>
+      </div>
+      <pre id="log">Battle report</pre>
+    </div>
+    <div id="arena"></div>
     <%= javascript_include_tag 'application' %>
   </body>
 </html>

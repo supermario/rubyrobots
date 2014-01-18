@@ -8,14 +8,15 @@ GIT
 
 GIT
   remote: https://github.com/opal/opal-browser.git
-  revision: a1baca0a737ebb32b427b6e4c32b3746051d361e
+  revision: 8b2545acacaaaa59edf55cf1fe4e093cc19491ec
   specs:
-    opal-browser (0.1.0)
-      opal (>= 0.4.3)
+    opal-browser (0.1.0.beta1)
+      opal (>= 0.5.5)
+      paggio
 
 GIT
   remote: https://github.com/opal/opal.git
-  revision: 5f9c5e004c5494425607ea15407080a72b3c5990
+  revision: aab1c344b58c6eeb91e527fca01e059a8d643065
   specs:
     opal (0.6.0)
       source_map
@@ -27,6 +28,7 @@ GEM
     hike (1.2.3)
     json (1.8.1)
     multi_json (1.8.2)
+    paggio (0.2.3)
     rack (1.5.2)
     source_map (3.0.1)
       json

@@ -1,3 +1,5 @@
+require 'browser'
+
 TkRobot = Struct.new(:body, :gun, :radar, :speech, :info, :status)
 
 class TkArena
@@ -8,7 +10,6 @@ class TkArena
   attr_accessor :default_skin_prefix
 
   def initialize battlefield, xres, yres, speed_multiplier
-    @native_window ||= Native `window`
     @battlefield = battlefield
     @xres, @yres = xres, yres
     @speed_multiplier = speed_multiplier
@@ -19,8 +20,8 @@ class TkArena
       '#e88302',
       '#e67504',
       '#db6903',
-      '#222',
-      '#333'
+      '#333',
+      '#222'
     ]
 
     @team_colors = [['#d00', '#900'], ['#77f', '#337']]
@@ -44,12 +45,10 @@ class TkArena
   end
 
   def init_canvas
-    options = {
-      width: xres,
-      height: yres
-    }
-    @two = Native `new Two(#{options})`
-    @two.appendTo $document.body
+    @two = `new Two({width: #{xres}, height: #{yres}})`
+    @two = Native(@two)
+    arena = $document['arena']
+    @two.appendTo arena
   end
 
   def init_simulation
@@ -76,7 +75,7 @@ class TkArena
     end
     ticks.times do
       if @battlefield.game_over
-        @native_window.clearInterval @interval
+        @interval.stop
         @on_game_over_handlers.each{|h| h.call(@battlefield) }
         unless true # @game_over
           winner = @robots.keys.first
@@ -119,7 +118,7 @@ class TkArena
         size = ai.size / 2
         scale = size / 16.0
         width = 16.0 / size
-        longest_line = Math::hypot(xres, yres)
+        longest_line = xres * xres + yres * yres
         primary_color = @team_colors[ai.team].first
         secondary_color = @team_colors[ai.team].last
 
@@ -127,7 +126,7 @@ class TkArena
         radar.translation.set 0, -longest_line / 2
 
         radar_group = @two.makeGroup radar
-        radar_group.stroke = '#ddd'
+        radar_group.stroke = secondary_color # '#ddd'
         radar_group.linewidth = 2
 
         left_track = @two.makeRectangle -6, 0, 4, 16
@@ -260,7 +259,7 @@ class TkArena
   end
 
   def run
-    @interval = @native_window.setInterval proc { draw_frame }, 40
+    @interval = every(1/25) { draw_frame }
   end
 
 end
