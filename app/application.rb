@@ -5,7 +5,6 @@ require "json"
 require "two"
 require "github"
 require "browser"
-require "browser/http"
 require "rrobots/rrobots"
 
 module Kernel
