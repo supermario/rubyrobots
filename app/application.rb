@@ -27,7 +27,7 @@ end
 
 class Application
   def initialize
-    if gist_id
+    if gist_ids.size > 1
       puts 'Loading robots'
       load_ducks
     else
@@ -35,50 +35,66 @@ class Application
     end
   end
 
-  def load_ducks
-    gist.read { |error, gist_content| ducks_loaded(gist_content) }
-  end
+  private
 
-  def ducks_loaded(gist_content)
-    content = JSON.from_object gist_content
-    files = content[:files].values
-    files = files.take 2
-    ducks = eval_ducks files
-    start_battle ducks
-  end
-
-  def gist_id
-    @gist_id ||= begin
+  def gist_ids
+    @gist_ids ||= begin
       fragment = $document.location.fragment
-      fragment = fragment.gsub /\D+/, ''
-      fragment.empty?? nil : fragment.to_i
+      fragment.scan(/\d+/)
     end
   end
 
-  def gist
-    @gist ||= github.getGist gist_id
+  def load_ducks
+    @ducks = []
+    gists.each { |gist| read_gist(gist) }
+  end
+
+  def gists
+    @gists ||= gist_ids.map { |id| get_gist(id) }
+  end
+
+  def get_gist(id)
+    github.getGist(id)
   end
 
   def github
     @github ||= Native `new Github({})`
   end
 
-  def eval_ducks(duck_files)
-    duck_files.map do |file|
-      content = file[:content]
-      filename = file[:filename]
+  def read_gist(gist)
+    gist.read { |error, content| load_duck(json_from_object content) }
+  end
 
-      eval_duck(filename, content)
+  def load_duck(content)
+    files = content[:files].values
+    @ducks << eval_duck(files.first)
+    start_battle_if_all_ducks_loaded
+  end
+
+  def json_from_object(content)
+    JSON.from_object(content)
+  end
+
+  def start_battle_if_all_ducks_loaded
+    if @ducks.size == gists.size
+      start_battle @ducks
     end
   end
 
-  def eval_duck(filename, content)
-    code = Opal.compile content
+  def eval_duck(file)
+    code = file[:content]
+    code = opal_compile(code)
     eval_js code
+
+    filename = file[:filename]
     filename
       .gsub('.rb', '')
       .camelize
       .classify
+  end
+
+  def opal_compile(code)
+    Opal.compile(code)
   end
 
   def eval_js(code)
