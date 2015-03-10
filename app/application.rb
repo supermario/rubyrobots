@@ -25,7 +25,10 @@ class String
 end
 
 class Application
+  attr_accessor :started
+
   def initialize
+    @started = false
     if gist_ids.size > 1
       puts 'Loading robots'
       load_ducks
@@ -67,7 +70,14 @@ class Application
   def load_duck(content)
     files = content[:files].values
     @ducks << eval_duck(files.first)
-    start_battle_if_all_ducks_loaded
+
+    mybot_code = opal_compile($document['brains'].inner_html)
+    eval_js mybot_code
+    @ducks << 'MyDuck'.classify
+
+    start_battle @ducks unless started
+
+    # start_battle_if_all_ducks_loaded
   end
 
   def json_from_object(content)
@@ -147,6 +157,7 @@ class Application
   end
 
   def start_battle(ducks)
+    @started = true
     xres = yres = 400
     seed = 0
     speed_multiplier = 1
@@ -158,7 +169,7 @@ class Application
       battlefield << RobotRunner.new(duck.new, battlefield, index)
     end
 
-    puts 'Battle started'
+    puts "Battle started between #{ducks.join(' and ')}"
 
     run_in_gui battlefield, xres, yres, speed_multiplier
   end

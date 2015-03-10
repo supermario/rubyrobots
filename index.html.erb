@@ -31,60 +31,31 @@
         border: 1px solid #e0e0e0;
         background-image: url("tiles.png");
       }
+
+      textarea {
+        font-family: monospace;
+      }
     </style>
   </head>
   <body>
     <div id="text">
       <div id="welcome">
-        <h1>Hello.</h1>
-        <p>
-          This is in-browser version of
-          <a href="http://rrobots.rubyforge.org/">Ruby Robots</a>!
-        </p>
-        <p>
-          Feel free to check out some of the cool robot battles from the
-          <a href="http://rubyquiz.com/quiz59.html">Ruby Quiz</a>:
-          <ul>
-            <li>
-              <a href="#8499891vs8499895" target="_blank">Simple battle</a>
-              between
-              <a href="https://gist.github.com/4r2r/8499891">SittingDuck</a>
-              and
-              <a href="https://gist.github.com/4r2r/8499895">NervousDuck</a>.
-            </li>
-            <li>
-              <a href="#8500160vs8500156" target="_blank">Battle</a>
-              between
-              <a href="https://gist.github.com/4r2r/8500160">Ente</a>
-              and
-              <a href="https://gist.github.com/4r2r/8500156">RubberDuck</a>.
-            </li>
-            <li>
-              <a href="#8516065vs8516062" target="_blank">Fight</a>
-              between
-              <a href="https://gist.github.com/4r2r/8516065">DuckBill09</a>
-              and
-              <a href="https://gist.github.com/4r2r/8516062">WKB</a>.
-            </li>
-          </ul>
-          <div class="or">- or -</div>
-          <ol>
-            <li>
-              Create a
-              <a href="https://gist.github.com/">gist</a>
-              for each robot program.
-            </li>
-            <li>
-              Add gist identificators separated by "vs" to the url like
-              <a href="#8499891vs8499895" target="_blank">this</a>.
-            </li>
-          </ol>
-        </p>
-        <p>
-          You can also check the
-          <a href="https://github.com/4r2r/opal-robots">github project page</a>
-        </p>
+        <a href="https://gist.github.com/4r2r/8499891">SittingDuck</a>
+        <a href="/#8499891vs8499895">Fight</a>
       </div>
+
+      <textarea cols="50" rows="20" id="brains">
+class MyDuck
+  include Robot
+
+  def tick events
+    turn_radar 5 if time == 0
+    fire 3 unless events['robot_scanned'].empty?
+    turn_gun 10
+  end
+end
+      </textarea>
+
       <pre id="log">Battle report</pre>
     </div>
     <div id="arena"></div>
