@@ -5,25 +5,26 @@ require './ducks/Ente'
 require './tkarena'
 
 class Numeric
-   TO_RAD = Math::PI / 180.0
-   TO_DEG = 180.0 / Math::PI
-   def to_rad
-     self * TO_RAD
-   end
-   def to_deg
-     self * TO_DEG
-   end
+  TO_RAD = Math::PI / 180.0
+  TO_DEG = 180.0 / Math::PI
+  def to_rad
+    self * TO_RAD
+  end
+
+  def to_deg
+    self * TO_DEG
+  end
 end
 
 class Battlefield
   attr_reader :width, :height, :robots, :teams, :bullets, :explosions, :time, :seed, :timeout, :game_over
 
-  def initialize width, height, timeout, seed
+  def initialize(width, height, timeout, seed)
     @width, @height = width, height
     @seed = seed
     @time = 0
     @robots = []
-    @teams = Hash.new{|h,k| h[k] = [] }
+    @teams = Hash.new { |h, k| h[k] = [] }
     @bullets = []
     @explosions = []
     @timeout = timeout
@@ -31,7 +32,7 @@ class Battlefield
     srand @seed
   end
 
-  def << object
+  def <<(object)
     case object
     when RobotRunner
       @robots << object
@@ -44,49 +45,47 @@ class Battlefield
   end
 
   def tick
-    explosions.delete_if{|explosion| explosion.dead}
-    explosions.each{|explosion| explosion.tick}
+    explosions.delete_if(&:dead)
+    explosions.each(&:tick)
 
-    bullets.delete_if{|bullet| bullet.dead}
-    bullets.each{|bullet| bullet.tick}
+    bullets.delete_if(&:dead)
+    bullets.each(&:tick)
 
     robots.each do |robot|
       begin
         robot.send :internal_tick unless robot.dead
-      rescue Exception => bang
+      rescue => bang
         puts "#{robot} made an exception:"
         puts "#{bang.class}: #{bang}", bang.backtrace
-        robot.instance_eval{@energy = -1}
+        robot.instance_eval { @energy = -1 }
       end
     end
 
     @time += 1
-    live_robots = robots.find_all{|robot| !robot.dead}
-    @game_over = (  (@time >= timeout) or # timeout reached
-                    (live_robots.length == 0) or # no robots alive, draw game
-                    (live_robots.all?{|r| r.team == live_robots.first.team})) # all other teams are dead
-    not @game_over
+    live_robots = robots.select { |robot| !robot.dead }
+    @game_over = ((@time >= timeout) || # timeout reached
+                    (live_robots.length == 0) || # no robots alive, draw game
+                    (live_robots.all? { |r| r.team == live_robots.first.team })) # all other teams are dead
+    !@game_over
   end
 
   def state
-    {:explosions => explosions.map{|e| e.state},
-     :bullets    => bullets.map{|b| b.state},
-     :robots     => robots.map{|r| r.state}}
+    { explosions: explosions.map(&:state),
+      bullets: bullets.map(&:state),
+      robots: robots.map(&:state) }
   end
-
 end
-
 
 class Explosion
   attr_accessor :x, :y, :t, :dead
 
-  def initialize bf, x, y
+  def initialize(bf, x, y)
     @x, @y, @t = x, y, 0
     @battlefield, dead = bf, false
   end
 
   def state
-    {:x => x, :y => y, :t => t}
+    { x: x, y: y, t: t }
   end
 
   def tick
@@ -98,20 +97,20 @@ end
 class Bullet
   attr_accessor :x, :y, :heading, :speed, :energy, :dead, :origin
 
-  def initialize bf, x, y, heading, speed, energy, origin
+  def initialize(bf, x, y, heading, speed, energy, origin)
     @x, @y, @heading, @origin = x, y, heading, origin
     @speed, @energy = speed, energy
     @battlefield, dead = bf, false
   end
 
   def state
-    {:x => x, :y => y, :energy => energy}
+    { x: x, y: y, energy: energy }
   end
 
   def tick
     return if @dead
-    @x += Math::cos(@heading.to_rad) * @speed
-    @y -= Math::sin(@heading.to_rad) * @speed
+    @x += Math.cos(@heading.to_rad) * @speed
+    @y -= Math.sin(@heading.to_rad) * @speed
 
     @dead ||= (@x < 0) || (@x >= @battlefield.width)
     @dead ||= (@y < 0) || (@y >= @battlefield.height)

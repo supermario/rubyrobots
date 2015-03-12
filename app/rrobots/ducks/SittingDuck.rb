@@ -1,7 +1,7 @@
 class SittingDuck
-   include Robot
+  include Robot
 
-  def tick events
+  def tick(events)
     turn_radar 5 if time == 0
     fire 3 unless events['robot_scanned'].empty?
     turn_gun 10

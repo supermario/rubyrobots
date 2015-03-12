@@ -32,42 +32,42 @@ class Application
 
   def run_in_gui(battlefield, xres, yres, speed_multiplier)
     arena = TkArena.new(battlefield, xres, yres, speed_multiplier)
-    game_over_counter = battlefield.teams.all?{|k,t| t.size < 2} ? 250 : 500
+    game_over_counter = battlefield.teams.all? { |_k, t| t.size < 2 } ? 250 : 500
     outcome_printed = false
-    arena.on_game_over{|battlefield|
+    arena.on_game_over do|battlefield|
       unless outcome_printed
         print_outcome(battlefield)
         outcome_printed = true
       end
       exit 0 if game_over_counter < 0
       game_over_counter -= 1
-    }
+    end
     arena.run
   end
 
   def print_outcome(battlefield)
-    winners = battlefield.robots.find_all{|robot| !robot.dead}
+    winners = battlefield.robots.select { |robot| !robot.dead }
     puts
     if battlefield.robots.size > battlefield.teams.size
-      teams = battlefield.teams.find_all{|name,team| !team.all?{|robot| robot.dead} }
+      teams = battlefield.teams.select { |_name, team| !team.all?(&:dead) }
       puts "winner_is:     { #{
-        teams.map do |name,team|
+        teams.map do |name, team|
           "Team #{name}: [#{team.join(', ')}]"
         end.join(', ')
       } }"
       puts "winner_energy: { #{
-        teams.map do |name,team|
-          "Team #{name}: [#{team.map do |w| ('%.1f' % w.energy) end.join(', ')}]"
+        teams.map do |name, team|
+          "Team #{name}: [#{team.map { |w| ('%.1f' % w.energy) }.join(', ')}]"
         end.join(', ')
       } }"
     else
-      puts "winner_is:     [#{winners.map{|w|w.name}.join(', ')}]"
-      puts "winner_energy: [#{winners.map{|w|'%.1f' % w.energy}.join(', ')}]"
+      puts "winner_is:     [#{winners.map(&:name).join(', ')}]"
+      puts "winner_energy: [#{winners.map { |w|'%.1f' % w.energy }.join(', ')}]"
     end
     puts "elapsed_ticks: #{battlefield.time}"
     puts "seed :         #{battlefield.seed}"
     puts
-    puts "robots :"
+    puts 'robots :'
     battlefield.robots.each do |robot|
       puts "  #{robot.name}:"
       puts "    damage_given: #{'%.1f' % robot.damage_given}"
@@ -82,7 +82,7 @@ class Application
     xres = yres = 400
     seed = 0
     speed_multiplier = 1
-    timeout = 50000
+    timeout = 50_000
 
     battlefield = Battlefield.new xres * 2, yres * 2, timeout, seed
 
@@ -98,7 +98,6 @@ end
 
 a = Application.new
 
-$document['run'].on :click do |event|
+$document['run'].on :click do
   a.load_ducks
 end
-

@@ -1,59 +1,53 @@
 class << Module.new # anonymous container
-
   module RobotMath
-
     def weighted_linear_regression(data)
-      w,x,y = [],[],[]
+      w, x, y = [], [], []
 
-      data.each do |(xp,yp,wp)|
+      data.each do |(xp, yp, wp)|
         w << wp.to_f
         x << xp.to_f
         y << yp.to_f
       end
 
-      x2 = x.map{|e|e*e}
-      xy = x.zip(y).map{|(a,b)|a*b}
+      x2 = x.map { |e|e * e }
+      xy = x.zip(y).map { |(a, b)|a * b }
 
-      xs = x.zip(w).inject(0){|a,(b,c)|a+b*c}
-      ys = y.zip(w).inject(0){|a,(b,c)|a+b*c}
-      x2s = x2.zip(w).inject(0){|a,(b,c)|a+b*c}
-      xys = xy.zip(w).inject(0){|a,(b,c)|a+b*c}
-      one = w.inject(0){|a,b|a+b}
+      xs = x.zip(w).reduce(0) { |a, (b, c)|a + b * c }
+      ys = y.zip(w).reduce(0) { |a, (b, c)|a + b * c }
+      x2s = x2.zip(w).reduce(0) { |a, (b, c)|a + b * c }
+      xys = xy.zip(w).reduce(0) { |a, (b, c)|a + b * c }
+      one = w.reduce(0) { |a, b|a + b }
 
-      div = xs*xs - one * x2s
+      div = xs * xs - one * x2s
 
-      a = (xs * ys - one * xys)/div
-      b = (xs * xys - x2s * ys)/div
-      return a,b
+      a = (xs * ys - one * xys) / div
+      b = (xs * xys - x2s * ys) / div
+      [a, b]
     end
 
     def zero_fixed_linear_regression(data)
-      x,y = [],[]
+      x, y = [], []
 
-      data.each do |(xp,yp)|
+      data.each do |(xp, yp)|
         x << xp.to_f
         y << yp.to_f
       end
 
-      x2 = x.map{|e|e*e}.inject(0){|a,b|a+b}
-      xy = x.zip(y).map{|(a,b)|a*b}.inject(0){|a,b|a+b}
+      x2 = x.map { |e|e * e }.reduce(0) { |a, b|a + b }
+      xy = x.zip(y).map { |(a, b)|a * b }.reduce(0) { |a, b|a + b }
 
-      return xy/x2
+      xy / x2
     end
 
-
-    def offset(heading_a,heading_b = 0)
-      my_offset = (heading_a-heading_b) % 360
-      my_offset = my_offset -360 if my_offset > 180
+    def offset(heading_a, heading_b = 0)
+      my_offset = (heading_a - heading_b) % 360
+      my_offset = my_offset - 360 if my_offset > 180
       my_offset
     end
-
   end
-
 
   module Turnarounder
     def initialize
-
       @wanted_heading = 0
 
       @wanted_gun_heading = 0
@@ -65,23 +59,23 @@ class << Module.new # anonymous container
       super
     end
 
-    def head_to deg
+    def head_to(deg)
       @wanted_heading = deg
     end
 
-    def head_gun_to deg
+    def head_gun_to(deg)
       @wanted_gun_heading = deg
     end
 
-    def head_radar_to deg
+    def head_radar_to(deg)
       @wanted_radar_heading = deg
     end
 
     def next_delta_heading
-      [-10,[offset(@wanted_heading,heading),10].min].max
+      [-10, [offset(@wanted_heading, heading), 10].min].max
     end
 
-    alias turn_amount next_delta_heading
+    alias_method :turn_amount, :next_delta_heading
 
     def ready?
       offset(next_heading - @wanted_heading).abs < 2
@@ -92,7 +86,7 @@ class << Module.new # anonymous container
     end
 
     def turn_gun_amount
-      [-30,[offset(@wanted_gun_heading,gun_heading+next_delta_heading),30].min].max
+      [-30, [offset(@wanted_gun_heading, gun_heading + next_delta_heading), 30].min].max
     end
 
     def gun_ready?
@@ -100,7 +94,7 @@ class << Module.new # anonymous container
     end
 
     def next_delta_gun_heading
-      next_delta_heading+turn_gun_amount
+      next_delta_heading + turn_gun_amount
     end
 
     def next_gun_heading
@@ -108,18 +102,15 @@ class << Module.new # anonymous container
     end
 
     def turn_radar_amount
-      [-60,[offset(@wanted_radar_heading,radar_heading+next_delta_gun_heading),60].min].max
+      [-60, [offset(@wanted_radar_heading, radar_heading + next_delta_gun_heading), 60].min].max
     end
 
     def radar_ready?
-
-
       offset(next_radar_heading - @wanted_radar_heading).abs < 2
-
     end
 
     def next_delta_radar_heading
-      next_delta_gun_heading+turn_radar_amount
+      next_delta_gun_heading + turn_radar_amount
     end
 
     def next_radar_heading
@@ -132,27 +123,25 @@ class << Module.new # anonymous container
       proxy_turn_radar turn_radar_amount
 
       @last_radar_heading = radar_heading
-
     end
 
-    def turn x
+    def turn(x)
       @wanted_heading += x
     end
 
-    def turn_gun x
+    def turn_gun(x)
       @wanted_gun_heading += x
     end
 
-    def turn_radar x
+    def turn_radar(x)
       @wanted_radar_heading += x
     end
 
     def mid_radar_heading
-      turnc = offset(radar_heading,@last_radar_heading)
+      turnc = offset(radar_heading, @last_radar_heading)
 
-      radar_heading-(turnc/2.0)
+      radar_heading - (turnc / 2.0)
     end
-
   end
 
   module Pointanizer
@@ -160,14 +149,14 @@ class << Module.new # anonymous container
     include RobotMath
     include Turnarounder
 
-    def move_to x,y
+    def move_to(x, y)
       @move_x = x
       @move_y = y
       @move_mode = :to
     end
 
-    def move mode,x,y
-      @move_x,@move_y = x,y
+    def move(mode, x, y)
+      @move_x, @move_y = x, y
       @move_mode = mode
     end
 
@@ -176,47 +165,44 @@ class << Module.new # anonymous container
     end
 
     def moving?
-       @move_mode
+      @move_mode
     end
 
     def on_wall?
-      xcor <= size*3 or ycor <= size*3 or battlefield_width - xcor <= size*3 or battlefield_height - ycor <= size*3
+      xcor <= size * 3 || ycor <= size * 3 || battlefield_width - xcor <= size * 3 || battlefield_height - ycor <= size * 3
     end
 
     def final_point
+      yc = ycor - @move_y rescue 0
+      xc = @move_x - xcor rescue 0
 
-        yc = ycor-@move_y rescue 0
-        xc = @move_x-xcor rescue 0
+      if hypot(yc, xc) < size / 3
+        @move_mode = false
+      end
 
-        if hypot(yc,xc) < size/3
-          @move_mode = false
-        end
+      acc = true
 
-        acc = true
+      case @move_mode
+      when :to
+        head_to atan2(yc, xc).to_deg
+      when :away
+        head_to atan2(yc, xc).to_deg + 180
+      when :side_a
+        head_to atan2(yc, xc).to_deg + 60
+      when :side_b
+        head_to atan2(yc, xc).to_deg - 60
+      when nil, false
+        acc = false
+      else
+        fail 'Unknown move mode!'
+      end
 
-        case @move_mode
-        when :to
-          head_to atan2(yc,xc).to_deg
-        when :away
-          head_to atan2(yc,xc).to_deg+180
-        when :side_a
-          head_to atan2(yc,xc).to_deg+60
-        when :side_b
-          head_to atan2(yc,xc).to_deg-60
-        when nil,false
-          acc = false
-        else
-          raise "Unknown move mode!"
-        end
-
-        accelerate(8) if acc
-
+      accelerate(8) if acc
     end
 
-    def rad_to_xy(r,d)
-      return xcor + cos(r.to_rad)*d, ycor - sin(r.to_rad)*d
+    def rad_to_xy(r, d)
+      [xcor + cos(r.to_rad) * d, ycor - sin(r.to_rad) * d]
     end
-
   end
 
   class Brain
@@ -236,7 +222,7 @@ class << Module.new # anonymous container
 
     TRACK_RANGE = 1150.0
 
-    #movement
+    # movement
 
     INFACTOR = 9
     OUTFACTOR = 10
@@ -244,7 +230,7 @@ class << Module.new # anonymous container
     TIMEOUT = 20
     DIFF = 5.3
     HITAWAY = 5
-    SDIFF = 60*DIFF
+    SDIFF = 60 * DIFF
 
     RANDTURN = 0.11
 
@@ -261,84 +247,79 @@ class << Module.new # anonymous container
       @radar_speed = 1
       @track_mul = 1
 
-      @searching =0
-      @seeking =0
+      @searching = 0
+      @seeking = 0
 
-      #movement
+      # movement
       @move_direction = 1
       @lasthitcount = 0
       @lasthitcount2 = false
       @lastchange = -TIMEOUT
     end
 
-    def old_predict ptime
+    def old_predict(ptime)
       if @points.size < MIN_POINTS
-        return rand(battlefield_width),rand(battlefield_height)
+        return rand(battlefield_width), rand(battlefield_height)
       end
 
       ltime = @points.last.last
       ftime = ltime - HISTORY_TIMEOUT
       xint = []
       yint = []
-      @points.each do |(x,y,ktime)|
-        r = ((ktime-ftime)/HISTORY_TIMEOUT.to_f)
+      @points.each do |(x, y, ktime)|
+        r = ((ktime - ftime) / HISTORY_TIMEOUT.to_f)
         r = (10**r)**2
-        xint << [ktime,x,r]
-        yint << [ktime,y,r]
+        xint << [ktime, x, r]
+        yint << [ktime, y, r]
       end
 
-      xa,xb = weighted_linear_regression(xint)
-      ya,yb = weighted_linear_regression(yint)
+      xa, xb = weighted_linear_regression(xint)
+      ya, yb = weighted_linear_regression(yint)
 
-      return xa*ptime+xb,ya*ptime+yb
-
+      [xa * ptime + xb, ya * ptime + yb]
     end
 
-    def predict ptime
+    def predict(ptime)
       if @points.size < MIN_POINTS
-        return rand(battlefield_width),rand(battlefield_height)
+        return rand(battlefield_width), rand(battlefield_height)
       end
 
-      ltime = (@points.last.last+@points[-2].last)/2.0
-      lx = (@points.last[0]+@points[-2][0])/2.0
-      ly = (@points.last[1]+@points[-2][1])/2.0
+      ltime = (@points.last.last + @points[-2].last) / 2.0
+      lx = (@points.last[0] + @points[-2][0]) / 2.0
+      ly = (@points.last[1] + @points[-2][1]) / 2.0
 
-      xint = @points.map{|x,y,xtime| [xtime-ltime,x-lx]}
-      yint = @points.map{|x,y,xtime| [xtime-ltime,y-ly]}
-
+      xint = @points.map { |x, _y, xtime| [xtime - ltime, x - lx] }
+      yint = @points.map { |_x, y, xtime| [xtime - ltime, y - ly] }
 
       xa = zero_fixed_linear_regression xint
       ya = zero_fixed_linear_regression yint
 
-      q = (ptime-ltime)
+      q = (ptime - ltime)
 
-      x,y =  q*xa+lx,q*ya+ly
+      x, y =  q * xa + lx, q * ya + ly
 
-      x2,y2 = old_predict ptime
+      x2, y2 = old_predict ptime
 
-      return (x+x2)/2,(y+y2)/2
-
+      [(x + x2) / 2, (y + y2) / 2]
     end
 
     def predcurrent
-      @predx,@predy = predict time unless @predx
+      @predx, @predy = predict time unless @predx
     end
 
-    def tick events
-
+    def tick(events)
       fire 0.1
 
-      #event processing
+      # event processing
 
       if event = events['robot_scanned'].pop
         dist = event.first
 
-        x,y = rad_to_xy(mid_radar_heading,dist)
+        x, y = rad_to_xy(mid_radar_heading, dist)
 
+        @points << [x, y, time]
 
-        @points << [x,y,time]
-
-        if @points.size > HISTORY_SIZE or time - @points.first.last >= HISTORY_TIMEOUT
+        if @points.size > HISTORY_SIZE || time - @points.first.last >= HISTORY_TIMEOUT
           @points.shift
         end
 
@@ -354,12 +335,12 @@ class << Module.new # anonymous container
 
       end
 
-      #moving
+      # moving
 
-      @predx,@predy = nil,nil
+      @predx, @predy = nil, nil
 
       if events['got_hit'].pop
-        @lasthitcount +=1
+        @lasthitcount += 1
       elsif @lasthitcount2
         @lasthitcount2 = false
         @lasthitcount = 0
@@ -367,7 +348,7 @@ class << Module.new # anonymous container
         @lasthitcount2 = true
       end
 
-      if ((on_wall? or (tmp = @lasthitcount >= HITAWAY) or rand < RANDTURN) and time - @lastchange > TIMEOUT) or @lasthitcount >= HITAWAY * 4
+      if ((on_wall? || (tmp = @lasthitcount >= HITAWAY) || rand < RANDTURN) && time - @lastchange > TIMEOUT) || @lasthitcount >= HITAWAY * 4
         @lasthitcount2 = false
         @lasthitcount = 0
         @lastchange = time
@@ -377,17 +358,17 @@ class << Module.new # anonymous container
       accelerate 8
       predcurrent
 
-      yc = ycor-predy rescue 0
-      xc = predx-xcor rescue 0
+      yc = ycor - predy rescue 0
+      xc = predx - xcor rescue 0
 
-      deg = atan2(yc,xc).to_deg+90*@move_direction
+      deg = atan2(yc, xc).to_deg + 90 * @move_direction
 
-      hyp = hypot(yc,xc)
+      hyp = hypot(yc, xc)
 
       if hyp < SDIFF
-        deg += OUTFACTOR*@move_direction
-      elsif hyp > SDIFF+size
-        deg -= INFACTOR*@move_direction
+        deg += OUTFACTOR * @move_direction
+      elsif hyp > SDIFF + size
+        deg -= INFACTOR * @move_direction
       end
 
       deg += rand(RANDOMIZE)
@@ -395,26 +376,26 @@ class << Module.new # anonymous container
 
       head_to deg
 
-      #aiming
+      # aiming
 
       if @points.size >= MIN_POINTS
         predcurrent
 
-        hyp = hypot(@predx-xcor,@predy-ycor)
+        hyp = hypot(@predx - xcor, @predy - ycor)
 
-        steps = (hyp-20) / BULLET_SPEED
+        steps = (hyp - 20) / BULLET_SPEED
 
-        fx,fy = predict(time+steps+1)
+        fx, fy = predict(time + steps + 1)
 
-        gh = atan2(ycor-fy,fx-xcor).to_deg+rand(7)-3
+        gh = atan2(ycor - fy, fx - xcor).to_deg + rand(7) - 3
 
         head_gun_to gh
       end
 
-      #scanning
+      # scanning
 
-      if time-@last_seen_time >= TRACK_TIMEOUT or @points.size < MIN_POINTS
-        say "Searching,"
+      if time - @last_seen_time >= TRACK_TIMEOUT || @points.size < MIN_POINTS
+        say 'Searching,'
 
         if radar_ready?
           turn_radar @radar_speed
@@ -422,23 +403,23 @@ class << Module.new # anonymous container
         end
 
       else
-        say "Seek and Destroy!"
+        say 'Seek and Destroy!'
 
         if radar_ready?
           predcurrent
 
-          yc = ycor-@predy rescue 0
-          xc = @predx-xcor rescue 0
+          yc = ycor - @predy rescue 0
+          xc = @predx - xcor rescue 0
 
-          deg = atan2(yc,xc).to_deg
+          deg = atan2(yc, xc).to_deg
 
-          dist = hypot(yc,xc)
+          dist = hypot(yc, xc)
 
-          sign = [-0.5,-1.5,-0.5,0.5,1.5,0.5][@direction % 6]
+          sign = [-0.5, -1.5, -0.5, 0.5, 1.5, 0.5][@direction % 6]
 
           @direction += 1
 
-          deg +=  ( TRACK_RANGE * @track_mul * sign)/dist
+          deg +=  (TRACK_RANGE * @track_mul * sign) / dist
 
           @track_mul *= SCAN_SWITCH2
 
@@ -449,13 +430,11 @@ class << Module.new # anonymous container
 
       final_point
       final_turn
-
     end
 
-    def method_missing(*args,&block)
-      @robot.relay(*args,&block)
+    def method_missing(*args, &block)
+      @robot.relay(*args, &block)
     end
-
   end
 
   class Proxy
@@ -465,7 +444,7 @@ class << Module.new # anonymous container
       @brain = Brain.new(self)
     end
 
-    EXPORT_MAP = Hash.new{|h,k|k}
+    EXPORT_MAP = Hash.new { |_h, k|k }
 
     EXPORT_MAP['xcor'] = 'x'
     EXPORT_MAP['ycor'] = 'y'
@@ -473,19 +452,17 @@ class << Module.new # anonymous container
     EXPORT_MAP['proxy_turn_gun'] = 'turn_gun'
     EXPORT_MAP['proxy_turn_radar'] = 'turn_radar'
 
-    def relay(method,*args,&block)
-      self.send(EXPORT_MAP[method.to_s],*args,&block)
+    def relay(method, *args, &block)
+      send(EXPORT_MAP[method.to_s], *args, &block)
     end
 
-    def tick events
+    def tick(events)
       @brain.tick events
     end
-
   end
 
-
-  classname = "Ente"
+  classname = 'Ente'
   unless Object.const_defined?(classname)
-    Object.const_set(classname,Class.new(Proxy))
+    Object.const_set(classname, Class.new(Proxy))
   end
 end

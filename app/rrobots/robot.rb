@@ -5,159 +5,155 @@ module Math
 end
 
 module Robot
-
   def self.attr_state(*names)
-    names.each{|n|
+    names.each do|n|
       n = n.to_sym
       attr_writer n
       attr_reader n
-    }
+    end
   end
 
   def self.attr_action(*names)
-    names.each{|n|
+    names.each do|n|
       n = n.to_sym
-      define_method(n){|param| @actions[n] = param }
-    }
+      define_method(n) { |param| @actions[n] = param }
+    end
   end
 
   def self.attr_event(*names)
-    names.each{|n|
+    names.each do|n|
       n = n.to_sym
-      define_method(n){ @events[n] }
-    }
+      define_method(n) { @events[n] }
+    end
   end
 
-  #the state hash of your robot. also accessible through the attr_state methods
+  # the state hash of your robot. also accessible through the attr_state methods
   attr_accessor :state
 
-  #the action hash of your robot
+  # the action hash of your robot
   attr_accessor :actions
 
-  #the event hash of your robot
+  # the event hash of your robot
   attr_accessor :events
 
-  #path to where your robot's optional skin images are
+  # path to where your robot's optional skin images are
   attr_accessor :skin_prefix
 
-  #team of your robot
+  # team of your robot
   attr_state :team
 
-  #the height of the battlefield
+  # the height of the battlefield
   attr_state :battlefield_height
 
-  #the width of the battlefield
+  # the width of the battlefield
   attr_state :battlefield_width
 
-  #your remaining energy (if this drops below 0 you are dead)
+  # your remaining energy (if this drops below 0 you are dead)
   attr_state :energy
 
-  #the heading of your gun, 0 pointing east, 90 pointing north, 180 pointing west, 270 pointing south
+  # the heading of your gun, 0 pointing east, 90 pointing north, 180 pointing west, 270 pointing south
   attr_state :gun_heading
 
-  #your gun heat, if this is above 0 you can't shoot
+  # your gun heat, if this is above 0 you can't shoot
   attr_state :gun_heat
 
-  #your robots heading, 0 pointing east, 90 pointing north, 180 pointing west, 270 pointing south
+  # your robots heading, 0 pointing east, 90 pointing north, 180 pointing west, 270 pointing south
   attr_state :heading
 
-  #your robots radius, if x <= size you hit the left wall
+  # your robots radius, if x <= size you hit the left wall
   attr_state :size
 
-  #the heading of your radar, 0 pointing east, 90 pointing north, 180 pointing west, 270 pointing south
+  # the heading of your radar, 0 pointing east, 90 pointing north, 180 pointing west, 270 pointing south
   attr_state :radar_heading
 
-  #ticks since match start
+  # ticks since match start
   attr_state :time
 
-  #whether the match is over or not, remember to go into cheer mode when this is true ;)
+  # whether the match is over or not, remember to go into cheer mode when this is true ;)
   attr_state :game_over
 
-  #your speed (-8..8)
+  # your speed (-8..8)
   attr_state :speed
-  alias :velocity :speed
+  alias_method :velocity, :speed
 
-  #your x coordinate, 0...battlefield_width
+  # your x coordinate, 0...battlefield_width
   attr_state :x
 
-  #your y coordinate, 0...battlefield_height
+  # your y coordinate, 0...battlefield_height
   attr_state :y
 
-  #accelerate (max speed is 8, max accelerate is 1/-1, negativ speed means moving backwards)
+  # accelerate (max speed is 8, max accelerate is 1/-1, negativ speed means moving backwards)
   attr_action :accelerate
 
-  #accelerates negativ if moving forward (and vice versa), may take 8 ticks to stop (and you have to call it every tick)
+  # accelerates negativ if moving forward (and vice versa), may take 8 ticks to stop (and you have to call it every tick)
   def stop
     accelerate((speed > 0) ? -1 : ((speed < 0) ? 1 : 0))
   end
 
-  #fires a bullet in the direction of your gun, power is 0.1 - 3, this power is taken from your energy
+  # fires a bullet in the direction of your gun, power is 0.1 - 3, this power is taken from your energy
   attr_action :fire
 
-  #turns the robot (and the gun and the radar), max 10 degrees per tick
+  # turns the robot (and the gun and the radar), max 10 degrees per tick
   attr_action :turn
 
-  #turns the gun (and the radar), max 30 degrees per tick
+  # turns the gun (and the radar), max 30 degrees per tick
   attr_action :turn_gun
 
-  #turns the radar, max 60 degrees per tick
+  # turns the radar, max 60 degrees per tick
   attr_action :turn_radar
 
-  #broadcast message to other robots
+  # broadcast message to other robots
   attr_action :broadcast
 
-  #say something to the spectators
+  # say something to the spectators
   attr_action :say
 
-  #if you got hit last turn, this won't be empty
+  # if you got hit last turn, this won't be empty
   attr_event :got_hit
 
-  #distances to robots your radar swept over during last tick
+  # distances to robots your radar swept over during last tick
   attr_event :robot_scanned
 
-  #broadcasts received last turn
+  # broadcasts received last turn
   attr_event :broadcasts
-
 end
 
-
 class RobotRunner
+  STATE_IVARS = [:x, :y, :gun_heat, :heading, :gun_heading, :radar_heading, :time, :size, :speed, :energy, :team]
+  NUMERIC_ACTIONS = [:fire, :turn, :turn_gun, :turn_radar, :accelerate]
+  STRING_ACTIONS = [:say, :broadcast]
 
-  STATE_IVARS = [ :x, :y, :gun_heat, :heading, :gun_heading, :radar_heading, :time, :size, :speed, :energy, :team ]
-  NUMERIC_ACTIONS = [ :fire, :turn, :turn_gun, :turn_radar, :accelerate ]
-  STRING_ACTIONS = [ :say, :broadcast ]
-
-  STATE_IVARS.each{|iv|
+  STATE_IVARS.each do|iv|
     attr_accessor iv
-  }
-  NUMERIC_ACTIONS.each{|iv|
+  end
+  NUMERIC_ACTIONS.each do|iv|
     attr_accessor "#{iv}_min", "#{iv}_max"
-  }
-  STRING_ACTIONS.each{|iv|
+  end
+  STRING_ACTIONS.each do|iv|
     attr_accessor "#{iv}_max"
-  }
+  end
 
-  #AI of this robot
+  # AI of this robot
   attr_accessor :robot
 
-  #team of this robot
+  # team of this robot
   attr_accessor :team
 
-  #keeps track of total damage done by this robot
+  # keeps track of total damage done by this robot
   attr_accessor :damage_given
 
-  #keeps track of the kills
+  # keeps track of the kills
   attr_accessor :kills
 
   attr_reader :actions, :speech
 
-  def initialize robot, bf, team=0
+  def initialize(robot, bf, team = 0)
     @robot = robot
     @battlefield = bf
     @team = team
     set_action_limits
     set_initial_state
-    @events = Hash.new{|h, k| h[k]=[]}
+    @events = Hash.new { |h, k| h[k] = [] }
     @actions = Hash.new(0)
   end
 
@@ -179,9 +175,9 @@ class RobotRunner
     teleport
   end
 
-  def teleport(distance_x=@battlefield.width / 2, distance_y=@battlefield.height / 2)
-    @x += ((rand-0.5) * 2 * distance_x).to_i
-    @y += ((rand-0.5) * 2 * distance_y).to_i
+  def teleport(distance_x = @battlefield.width / 2, distance_y = @battlefield.height / 2)
+    @x += ((rand - 0.5) * 2 * distance_x).to_i
+    @y += ((rand - 0.5) * 2 * distance_y).to_i
     @gun_heat = 3
     @heading = (rand * 360).to_i
     @gun_heading = @heading
@@ -199,7 +195,7 @@ class RobotRunner
     @broadcast_max = 16
   end
 
-  def hit bullet
+  def hit(bullet)
     damage = bullet.energy
     @energy -= damage
     @events['got_hit'] << [@energy]
@@ -236,22 +232,22 @@ class RobotRunner
 
   def parse_actions
     @actions.clear
-    NUMERIC_ACTIONS.each{|an|
+    NUMERIC_ACTIONS.each do|an|
       @actions[an] = clamp(@robot.actions[an], send("#{an}_min"), send("#{an}_max"))
-    }
-    STRING_ACTIONS.each{|an|
+    end
+    STRING_ACTIONS.each do|an|
       if @robot.actions[an] != 0
         @actions[an] = String(@robot.actions[an])[0, send("#{an}_max")]
       end
-    }
+    end
     @actions
   end
 
   def state
     current_state = {}
-    STATE_IVARS.each{|iv|
+    STATE_IVARS.each do|iv|
       current_state[iv] = send(iv)
-    }
+    end
     current_state[:battlefield_width] = @battlefield.width
     current_state[:battlefield_height] = @battlefield.height
     current_state[:game_over] = @battlefield.game_over
@@ -261,9 +257,9 @@ class RobotRunner
   def update_state
     new_state = state
     @robot.state = new_state
-    new_state.each{|k,v|
+    new_state.each do|k, v|
       @robot.send("#{k}=", v)
-    }
+    end
     @robot.events = @events.dup
 
     # @robot.actions ||= Hash.new(0)
@@ -278,8 +274,8 @@ class RobotRunner
 
   def fire
     if (@actions[:fire] > 0) && (@gun_heat == 0)
-      bullet = Bullet.new(@battlefield, @x, @y, @gun_heading, 30, @actions[:fire]*3.0, self)
-      3.times{bullet.tick}
+      bullet = Bullet.new(@battlefield, @x, @y, @gun_heading, 30, @actions[:fire] * 3.0, self)
+      3.times { bullet.tick }
       @battlefield << bullet
       @gun_heat = @actions[:fire]
     end
@@ -304,8 +300,8 @@ class RobotRunner
     @speed = 8 if @speed > 8
     @speed = -8 if @speed < -8
 
-    @x += Math::cos(@heading.to_rad) * @speed
-    @y -= Math::sin(@heading.to_rad) * @speed
+    @x += Math.cos(@heading.to_rad) * @speed
+    @y -= Math.sin(@heading.to_rad) * @speed
 
     @x = @size if @x - @size < 0
     @y = @size if @y - @size < 0
@@ -318,9 +314,9 @@ class RobotRunner
       if (other != self) && (!other.dead)
         a = Math.atan2(@y - other.y, other.x - @x) / Math::PI * 180 % 360
         if (@old_radar_heading <= a && a <= @new_radar_heading) || (@old_radar_heading >= a && a >= @new_radar_heading) ||
-          (@old_radar_heading <= a+360 && a+360 <= @new_radar_heading) || (@old_radar_heading >= a+360 && a+360 >= new_radar_heading) ||
-          (@old_radar_heading <= a-360 && a-360 <= @new_radar_heading) || (@old_radar_heading >= a-360 && a-360 >= @new_radar_heading)
-           @events['robot_scanned'] << [Math.hypot(@y - other.y, other.x - @x)]
+          (@old_radar_heading <= a + 360 && a + 360 <= @new_radar_heading) || (@old_radar_heading >= a + 360 && a + 360 >= new_radar_heading) ||
+          (@old_radar_heading <= a - 360 && a - 360 <= @new_radar_heading) || (@old_radar_heading >= a - 360 && a - 360 >= @new_radar_heading)
+          @events['robot_scanned'] << [Math.hypot(@y - other.y, other.x - @x)]
         end
       end
     end
@@ -330,7 +326,7 @@ class RobotRunner
     if @actions[:say] != 0
       @speech = @actions[:say]
       @speech_counter = 50
-    elsif @speech and (@speech_counter -= 1) < 0
+    elsif @speech && (@speech_counter -= 1) < 0
       @speech = nil
     end
   end
@@ -342,9 +338,9 @@ class RobotRunner
         if msg != 0
           a = Math.atan2(@y - other.y, other.x - @x) / Math::PI * 180 % 360
           dir = 'east'
-          dir = 'north' if a.between? 45,135
-          dir = 'west' if a.between? 135,225
-          dir = 'south' if a.between? 225,315
+          dir = 'north' if a.between? 45, 135
+          dir = 'west' if a.between? 135, 225
+          dir = 'south' if a.between? 225, 315
           @events['broadcasts'] << [msg, dir]
         end
       end
@@ -359,5 +355,4 @@ class RobotRunner
   def name
     @robot.class.name
   end
-
 end

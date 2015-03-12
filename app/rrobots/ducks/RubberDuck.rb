@@ -9,20 +9,24 @@ module RubberRobot
       @array = []
       @n = n
     end
-    def << (arg)
+
+    def <<(arg)
       @array.unshift arg
       @array = @array.first(@n)
     end
+
     def [](arg)
       @array[arg]
     end
+
     def to_a
       @array
     end
+
     def nearest_non_nil(idx)
       0.upto(51) do |offs|
-        next if @array[idx + ((offs % 2 == 0) ? -1 : 1)*offs].nil?
-        return idx + ((offs % 2 == 0) ? -1 : 1)*offs
+        next if @array[idx + ((offs % 2 == 0) ? -1 : 1) * offs].nil?
+        return idx + ((offs % 2 == 0) ? -1 : 1) * offs
       end
       nil
     end
@@ -32,33 +36,40 @@ module RubberRobot
     def time
       @robot.time
     end
+
     def battlefield_width
       @robot.battlefield_width
     end
+
     def battlefield_height
       @robot.battlefield_height
     end
+
     def size
       @robot.size
     end
+
     def say(string)
       @robot.say(string)
     end
+
     def trim(min, val, max) # {{{
       return min if val < min
       return max if val > max
-      return val
+      val
     end # }}}
+
     def strim(val, border) # {{{
       return -border if val < -border
       return border if val > border
-      return val
+      val
     end # }}}
+
     def initialize(robot) # {{{
       @memory = OpenStruct.new
       @memory.rheading    = Memo.new(MEMO_SIZE)
       @memory.pos         = Memo.new(MEMO_SIZE)
-      @memory.enemypos    = Memo.new(MEMO_SIZE*4)
+      @memory.enemypos    = Memo.new(MEMO_SIZE * 4)
       @memory.enemyrange  = Memo.new(MEMO_SIZE)
       @memory.enemyangle  = Memo.new(MEMO_SIZE)
       @memory.lastseen = nil
@@ -68,9 +79,9 @@ module RubberRobot
       @looking_since = 0
       @aim_mode = :linear
     end # }}}
-#   def method_missing(name, *args) # {{{
-#     @robot.__send__(name, *args)
-#   end # }}}
+    #   def method_missing(name, *args) # {{{
+    #     @robot.__send__(name, *args)
+    #   end # }}}
     def refresh # {{{
       @x = @robot.x
       @y = @robot.y
@@ -83,25 +94,26 @@ module RubberRobot
       @turret_heading = @robot.gun_heading
       @radar_heading = @robot.radar_heading
     end # }}}
+
     def tick(events) # {{{
       refresh
       save_memory
-      if events.has_key? 'robot_scanned'
+      if events.key? 'robot_scanned'
         r = events['robot_scanned'][0][0]
         phi0 = @memory.rheading[0]
         phi1 = @memory.rheading[1]
-        if (phi0 < 90 and phi1 > 270) or (phi0 > 270 and phi1 < 90)
+        if (phi0 < 90 && phi1 > 270) || (phi0 > 270 && phi1 < 90)
           phim = (phi0 + phi1 + 90) % 360 - 90
         else
-          phim = (phi0 + phi1)/2
+          phim = (phi0 + phi1) / 2
         end
         phi0, phi1, phim = phi0.to_rad, phi1.to_rad, phim.to_rad
-        dx = r*(cos(phi0) - cos(phi1)).abs/2
-        dy = r*(sin(phi0) - sin(phi1)).abs/2
+        dx = r * (cos(phi0) - cos(phi1)).abs / 2
+        dy = r * (sin(phi0) - sin(phi1)).abs / 2
         x = @x + r * cos(phim)
         y = @y - r * sin(phim)
         @memory.lastseen = 0
-        @memory.enemypos << [x,dx,y,dy]
+        @memory.enemypos << [x, dx, y, dy]
         @memory.enemyrange << r
         @memory.enemyangle << phim
         @memory.enemy
@@ -111,34 +123,35 @@ module RubberRobot
         @memory.enemyrange << nil
         @memory.enemyangle << nil
       end
-      if events.has_key? 'got_hit'
+      if events.key? 'got_hit'
         @lasthit = 0
       else
         @lasthit += 1
       end
       if time == 50
-        say "<Patrician|Away> what does your robot do, sam"
+        say '<Patrician|Away> what does your robot do, sam'
       elsif time == 100
-        say "<bovril> it collects data about the surrounding environment, ..."
+        say '<bovril> it collects data about the surrounding environment, ...'
       elsif time == 150
-        say "... then discards it and drives into walls"
+        say '... then discards it and drives into walls'
       end
       do_radar_aiming
       do_turret_aiming
       do_movement
       execute
     end # }}}
+
     def do_turret_aiming # {{{
-      if (time >= 200 and time % 100 == 0) or @schedule_calc
+      if (time >= 200 && time % 100 == 0) || @schedule_calc
         @schedule_calc = false
         corr = check_correlation
         begin
-          max = corr.max{|a,b| a[1] <=> b[1]}
+          max = corr.max { |a, b| a[1] <=> b[1] }
         rescue ArgumentError => e
           p corr.sort
           raise e
         end
-        if max[0] > 35 and max[1] > 0.35
+        if max[0] > 35 && max[1] > 0.35
           @aim_mode = :correlation
           @corr_diff = max[0]
         else
@@ -152,21 +165,19 @@ module RubberRobot
         i = 0
         angle = nil
         x, y = nil, nil
-        while true do
-          x,y = predict(dist/30.0 + 1) # TODO ???
-          break unless x and y
-          angle, distn = get_angle_and_dist(x,y)
-          if (distn - dist).abs < 15 or (i += 1) > 20
+        loop do
+          x, y = predict(dist / 30.0 + 1) # TODO ???
+          break unless x && y
+          angle, distn = get_angle_and_dist(x, y)
+          if (distn - dist).abs < 15 || (i += 1) > 20
             @turn_turret = deg_diff(angle, @turret_heading)
             break
           end
           dist = distn
         end
       when :correlation
-=begin
-``Those who cannot remember the past are condemned to repeat it.''
--- George Santayana (1863-1952)
-=end
+        # ``Those who cannot remember the past are condemned to repeat it.''
+        # -- George Santayana (1863-1952)
         idx = @memory.enemypos.nearest_non_nil(@corr_diff - 25)
         unless idx
           @turn_turret = 0
@@ -177,41 +188,41 @@ module RubberRobot
         angle = nil
         dist  = nil
         i = 0
-        while true do
+        loop do
           pos = @memory.enemypos[idx]
           angle, dist = get_angle_and_dist(pos[0], pos[2])
-          idxn = @memory.enemypos.nearest_non_nil(@corr_diff - (dist/30.0).to_i)
+          idxn = @memory.enemypos.nearest_non_nil(@corr_diff - (dist / 30.0).to_i)
           break unless idxn
           break if idxn == idx
           idx = idxn
           break if i >= 20
           i += 1
         end
-        x,dx,y,dy = @memory.enemypos[idx]
+        x, dx, y, dy = @memory.enemypos[idx]
         angle, dist = get_angle_and_dist(x, y)
         @turn_turret = deg_diff(angle, @turret_heading)
       else
-        raise 'wtf?'
+        fail 'wtf?'
       end
       @angle = angle
     end # }}}
+
     def do_radar_aiming # {{{
       @turn_radar = 10 and return unless @memory.lastseen
       @radar_turn_speed ||= 60
       if @memory.lastseen == 0
         @radar_turn_speed *= -0.5
       else @memory.lastseen != 2
-        @radar_turn_speed *= -2 if @radar_turn_speed.abs < 60
+           @radar_turn_speed *= -2 if @radar_turn_speed.abs < 60
       end
       @turn_radar = @radar_turn_speed
     end # }}}
+
     def do_movement # {{{
-=begin
-http://bash.org/?240849
-<Patrician|Away> what does your robot do, sam
-<bovril> it collects data about the surrounding environment, then discards it
-         and drives into walls
-=end
+      # http://bash.org/?240849
+      # <Patrician|Away> what does your robot do, sam
+      # <bovril> it collects data about the surrounding environment, then discards it
+      #          and drives into walls
       @accelerate = 1 # Energie!
       @move_dur ||= 0
       @turn_dur ||= 0
@@ -243,32 +254,40 @@ http://bash.org/?240849
         @turn_body = @turn_dir
       end
     end # }}}
+
     def sign(x) # {{{
       return 0 if x == 0
       return 1 if x > 1
-      return -1
+      -1
     end # }}}
+
     def dist_to_center # {{{
-      hypot(battlefield_height/2 - @y, battlefield_width/2 - @x)
+      hypot(battlefield_height / 2 - @y, battlefield_width / 2 - @x)
     end # }}}
+
     def angle_to_center
     end
+
     def get_revangle_and_dist_wall
-      return [[@x,0], [@y,270], [battlefield_width - @x, 180],  [battlefield_height - @y, 90]].min.reverse
+      [[@x, 0], [@y, 270], [battlefield_width - @x, 180],  [battlefield_height - @y, 90]].min.reverse
     end
+
     def approaching_center # {{{
       angle = (atan2(@x, @y).to_deg + 90) % 360
       diff = deg_diff(angle, @body_heading).abs
       diff < 80
     end # }}}
+
     def deg_diff(ang1, ang2) # {{{
       (ang1 - ang2 + 180) % 360 - 180
     end # }}}
-    def get_angle_and_dist(x,y) # {{{
+
+    def get_angle_and_dist(x, y) # {{{
       dx = x - @x
       dy = y - @y
-      return [(atan2(dx, dy).to_deg - 90) % 360, hypot(dx, dy)]
+      [(atan2(dx, dy).to_deg - 90) % 360, hypot(dx, dy)]
     end # }}}
+
     def predict(ticks, maxhist = 70) # {{{
       i = 0
       lx = 0.0
@@ -286,36 +305,36 @@ http://bash.org/?240849
         break if idx > maxhist
         break if i > 5
         x, dx, y, dy = ev
-        dx *= 1 + (idx / 50.to_f) ** 2
-        dy *= 1 + (idx / 50.to_f) ** 2
+        dx *= 1 + (idx / 50.to_f)**2
+        dy *= 1 + (idx / 50.to_f)**2
         dx = 1.0 if dx < 1.0
         dy = 1.0 if dy < 1.0
-        t = -idx-1
+        t = -idx - 1
         i += 1
         sx = dx**2
-        lx += t**2/sx
-        mx += t/sx
-        nx += t*x/sx
-        ox += x/sx
-        px += 1/sx
+        lx += t**2 / sx
+        mx += t / sx
+        nx += t * x / sx
+        ox += x / sx
+        px += 1 / sx
         sy = dy**2
-        ly += t**2/sy
-        my += t/sy
-        ny += t*y/sy
-        oy += y/sy
-        py += 1/sy
+        ly += t**2 / sy
+        my += t / sy
+        ny += t * y / sy
+        oy += y / sy
+        py += 1 / sy
       end
       return unless i >= 2
 
-      ax = (px*nx - mx*ox)/(px*lx - mx**2)
-      bx = 1/px*(mx*ax-ox)
-      ay = (py*ny - my*oy)/(py*ly - my**2)
-      by = 1/py*(my*ay-oy)
+      ax = (px * nx - mx * ox) / (px * lx - mx**2)
+      bx = 1 / px * (mx * ax - ox)
+      ay = (py * ny - my * oy) / (py * ly - my**2)
+      by = 1 / py * (my * ay - oy)
 
       bx *= -1
       by *= -1
 
-      factor = hypot(ax, ay)/8.0
+      factor = hypot(ax, ay) / 8.0
       if factor > 1
         ax /= factor
         ay /= factor
@@ -326,13 +345,14 @@ http://bash.org/?240849
       bx = size if bx < size
       by = size if by < size
 
-      px = bx+ax*ticks
-      py = by+ay*ticks
-      return if px.infinite? or px.nan? or py.infinite? or py.nan?
+      px = bx + ax * ticks
+      py = by + ay * ticks
+      return if px.infinite? || px.nan? || py.infinite? || py.nan?
       px = [battlefield_width - size, [size, px].max].min
       py = [battlefield_height - size, [size, py].max].min
       [px, py]
     end # }}}
+
     def execute # {{{
       @turn_turret -= @turn_body
       @turn_radar -= @turn_body + @turn_turret
@@ -345,10 +365,12 @@ http://bash.org/?240849
       @robot.turn_radar(@turn_radar)
       @robot.fire(@power)
     end # }}}
+
     def save_memory # {{{
       @memory.rheading << @radar_heading
       @memory.pos << [@x, @y]
     end # }}}
+
     def check_correlation # {{{
       pos = @memory.enemypos.to_a[0..500]
       size = @robot.size
@@ -357,15 +379,15 @@ http://bash.org/?240849
         hits = 0
         tries = 0
         0.upto(pos.size - diff) do |idx|
-          next unless pos[idx] and pos[idx + diff]
-          next unless hypot(pos[idx][1],pos[idx][3]) < 100
-          next unless hypot(pos[idx + diff][1],pos[idx + diff][3]) < 100
+          next unless pos[idx] && pos[idx + diff]
+          next unless hypot(pos[idx][1], pos[idx][3]) < 100
+          next unless hypot(pos[idx + diff][1], pos[idx + diff][3]) < 100
           dist = hypot(pos[idx][0] - pos[idx + diff][0],
                        pos[idx][2] - pos[idx + diff][2])
           tries += 1
           hits  += 1 if dist < size
         end
-        ratio = hits.to_f/tries
+        ratio = hits.to_f / tries
         ratio = 0.0 unless ratio.finite?
         corr_values[diff] = ratio
       end
