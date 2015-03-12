@@ -8,25 +8,25 @@ GIT
 
 GIT
   remote: https://github.com/opal/opal.git
-  revision: aab1c344b58c6eeb91e527fca01e059a8d643065
+  revision: a7d15256bdd90e01f125fe44d6a7f429c0de3b1d
   specs:
-    opal (0.6.0)
-      source_map
-      sprockets
+    opal (0.7.1)
+      hike (~> 1.2)
+      sourcemap (~> 0.1.0)
+      sprockets (>= 2.2.3, < 4.0.0)
+      tilt (~> 1.4)
 
 GEM
   remote: https://rubygems.org/
   specs:
     hike (1.2.3)
-    json (1.8.1)
-    multi_json (1.8.2)
-    paggio (0.2.3)
-    rack (1.5.2)
-    shotgun (0.9)
+    multi_json (1.11.0)
+    paggio (0.2.4)
+    rack (1.6.0)
+    shotgun (0.9.1)
       rack (>= 1.0)
-    source_map (3.0.1)
-      json
-    sprockets (2.10.1)
+    sourcemap (0.1.1)
+    sprockets (2.12.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)

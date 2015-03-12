@@ -1,8 +1,9 @@
-require './robot'
-require './ducks/NervousDuck'
-require './ducks/SittingDuck'
-require './ducks/Ente'
-require './tkarena'
+require 'math'
+require 'rrobots/robot'
+require 'rrobots/ducks/NervousDuck'
+require 'rrobots/ducks/SittingDuck'
+require 'rrobots/ducks/Ente'
+require 'rrobots/tkarena'
 
 class Numeric
   TO_RAD = Math::PI / 180.0
