@@ -3,6 +3,7 @@ require 'opal-parser'
 require 'pp'
 require 'two'
 require 'browser'
+require 'browser/interval'
 require 'rrobots/rrobots'
 require 'monkey_patches'
 
@@ -11,10 +12,7 @@ class Application
 
   def initialize
     @started = false
-    load_ducks
   end
-
-  private
 
   def load_ducks
     @ducks = []
@@ -23,6 +21,8 @@ class Application
 
     start_battle unless started
   end
+
+  private
 
   def load_text_bot
     eval $document['brains'].inner_html
@@ -96,4 +96,9 @@ class Application
   end
 end
 
-Application.new $document.body
+a = Application.new
+
+$document['run'].on :click do |event|
+  a.load_ducks
+end
+

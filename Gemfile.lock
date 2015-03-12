@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/opal/opal-browser.git
-  revision: 8b2545acacaaaa59edf55cf1fe4e093cc19491ec
+  revision: dff179fd08b44d19b6558aa7c429e1cee4770487
   specs:
-    opal-browser (0.1.0.beta1)
-      opal (>= 0.5.5)
+    opal-browser (0.2.0.beta1)
+      opal
       paggio
 
 GIT
