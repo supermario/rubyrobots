@@ -16,16 +16,7 @@ class Numeric
 end
 
 class Battlefield
-   attr_reader :width
-   attr_reader :height
-   attr_reader :robots
-   attr_reader :teams
-   attr_reader :bullets
-   attr_reader :explosions
-   attr_reader :time
-   attr_reader :seed
-   attr_reader :timeout  # how many ticks the match can go before ending.
-   attr_reader :game_over
+  attr_reader :width, :height, :robots, :teams, :bullets, :explosions, :time, :seed, :timeout, :game_over
 
   def initialize width, height, timeout, seed
     @width, @height = width, height
@@ -87,10 +78,7 @@ end
 
 
 class Explosion
-  attr_accessor :x
-  attr_accessor :y
-  attr_accessor :t
-  attr_accessor :dead
+  attr_accessor :x, :y, :t, :dead
 
   def initialize bf, x, y
     @x, @y, @t = x, y, 0
@@ -108,13 +96,7 @@ class Explosion
 end
 
 class Bullet
-  attr_accessor :x
-  attr_accessor :y
-  attr_accessor :heading
-  attr_accessor :speed
-  attr_accessor :energy
-  attr_accessor :dead
-  attr_accessor :origin
+  attr_accessor :x, :y, :heading, :speed, :energy, :dead, :origin
 
   def initialize bf, x, y, heading, speed, energy, origin
     @x, @y, @heading, @origin = x, y, heading, origin
