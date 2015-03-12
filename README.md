@@ -5,6 +5,7 @@
 ## Running locally
 
 ```
+bundle install
 bundle exec shotgun
 ```
 
