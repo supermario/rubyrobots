@@ -2,7 +2,7 @@ require 'browser'
 
 TkRobot = Struct.new(:body, :gun, :radar, :speech, :info, :status)
 
-class TkArena
+class Arena
   attr_reader :battlefield, :xres, :yres
   attr_accessor :speed_multiplier, :on_game_over_handlers
   attr_accessor :canvas, :boom, :robots, :bullets, :explosions, :colors, :team_colors

@@ -1,11 +1,13 @@
 require 'opal'
 require 'opal-parser'
-require 'pp'
 require 'two'
 require 'browser'
 require 'browser/interval'
-require 'rrobots/rrobots'
 require 'monkey_patches'
+
+require 'rubyrobots'
+require 'robots/nervous_duck'
+require 'robots/sitting_duck'
 
 class Application
   attr_accessor :started
@@ -15,11 +17,11 @@ class Application
   end
 
   def load_ducks
+    return if started
     @ducks = []
     @ducks << SittingDuck
     load_text_bot
-
-    start_battle unless started
+    start_battle
   end
 
   private
@@ -31,10 +33,10 @@ class Application
   end
 
   def run_in_gui(battlefield, xres, yres, speed_multiplier)
-    arena = TkArena.new(battlefield, xres, yres, speed_multiplier)
+    arena = Arena.new(battlefield, xres, yres, speed_multiplier)
     game_over_counter = battlefield.teams.all? { |_k, t| t.size < 2 } ? 250 : 500
     outcome_printed = false
-    arena.on_game_over do|battlefield|
+    arena.on_game_over do |battlefield|
       unless outcome_printed
         print_outcome(battlefield)
         outcome_printed = true
@@ -77,7 +79,6 @@ class Application
   end
 
   def start_battle
-    return if started
     @started = true
     xres = yres = 400
     seed = 0

@@ -1,9 +1,6 @@
 require 'math'
-require 'rrobots/robot'
-require 'rrobots/ducks/NervousDuck'
-require 'rrobots/ducks/SittingDuck'
-require 'rrobots/ducks/Ente'
-require 'rrobots/tkarena'
+require 'robot'
+require 'arena'
 
 class Numeric
   TO_RAD = Math::PI / 180.0
