@@ -35,14 +35,6 @@ class Arena
     @on_game_over_handlers << block
   end
 
-  def usage
-    puts 'usage: rrobots.rb <FirstRobotClassName[.rb]> <SecondRobotClassName[.rb]> <...>'
-    puts "\tthe names of the rb files have to match the class names of the robots"
-    puts "\t(up to 8 robots)"
-    puts "\te.g. 'ruby rrobots.rb SittingDuck NervousDuck'"
-    exit
-  end
-
   def init_canvas
     @two = `new Two({width: #{xres}, height: #{yres}})`
     @two = Native(@two)
@@ -76,21 +68,6 @@ class Arena
       if @battlefield.game_over
         @interval.stop
         @on_game_over_handlers.each { |h| h.call(@battlefield) }
-        unless true # @game_over
-          winner = @robots.keys.first
-          whohaswon = if winner.nil?
-                        'Draw!'
-          elsif @battlefield.teams.all? { |_k, t|t.size < 2 }
-                        "#{winner.name} won!"
-          else
-            "Team #{winner.team} won!"
-          end
-          text_color = winner ? winner.team : 7
-          @game_over = TkcText.new(canvas,
-                                   fill: @text_colors[text_color],
-                                   anchor: 'c', coords: [400, 400], font: 'courier 36', justify: 'center',
-                                   text: "GAME OVER\n#{whohaswon}")
-        end
       end
       @battlefield.tick
     end
@@ -173,36 +150,6 @@ class Arena
       robot.radar.translation.set ai.x / 2, ai.y / 2
       robot.radar.rotation = (90 - ai.radar_heading) / 180.0 * Math::PI
 
-      if false
-
-        # Struct.new(:body, :gun, :radar, :speech, :info, :status)
-        @robots[ai] ||= TkRobot.new(
-          TkcImage.new(@canvas, 0, 0),
-          TkcImage.new(@canvas, 0, 0),
-          TkcImage.new(@canvas, 0, 0),
-          TkcText.new(@canvas,
-                      fill: @text_colors[ai.team],
-                      anchor: 's', justify: 'center', coords: [ai.x / 2, ai.y / 2 - ai.size / 2]),
-          TkcText.new(@canvas,
-                      fill: @text_colors[ai.team],
-                      anchor: 'n', justify: 'center', coords: [ai.x / 2, ai.y / 2 + ai.size / 2]),
-          TkcText.new(@canvas,
-                      fill: @text_colors[ai.team],
-                      anchor: 'nw', coords: [10, 15 * i + 10], font: TkFont.new('courier 9')))
-
-        @robots[ai].body.configure(image: @colors[ai.team].body[(ai.heading + 5) / 10],
-                                   coords: [ai.x / 2, ai.y / 2])
-        @robots[ai].gun.configure(image: @colors[ai.team].gun[(ai.gun_heading + 5) / 10],
-                                  coords: [ai.x / 2, ai.y / 2])
-        @robots[ai].radar.configure(image: @colors[ai.team].radar[(ai.radar_heading + 5) / 10],
-                                    coords: [ai.x / 2, ai.y / 2])
-        @robots[ai].speech.configure(text: "#{ai.speech}",
-                                     coords: [ai.x / 2, ai.y / 2 - ai.size / 2])
-        @robots[ai].info.configure(text: "#{ai.name}\n#{'|' * (ai.energy / 5)}",
-                                   coords: [ai.x / 2, ai.y / 2 + ai.size / 2])
-        @robots[ai].status.configure(text: "#{ai.name.ljust(20)} #{'%.1f' % ai.energy}")
-
-      end
     end
   end
 
@@ -220,15 +167,6 @@ class Arena
       end
 
       bullet_circle.translation.set bullet.x / 2, bullet.y / 2
-
-      if false
-        @bullets[bullet] ||= TkcOval.new(
-          @canvas, [-2, -2], [3, 3],
-          fill: '#' + ('%02x' % (128 + bullet.energy * 14).to_i) * 3)
-        @bullets[bullet].coords(
-          bullet.x / 2 - 2, bullet.y / 2 - 2,
-          bullet.x / 2 + 3, bullet.y / 2 + 3)
-      end
     end
   end
 
@@ -249,11 +187,6 @@ class Arena
       explosion_circle.translation.set explosion.x / 2, explosion.y / 2
       explosion_circle.scale = (2 - Math.cos(explosion.t / 16.0 * Math::PI)) / 3
       explosion_circle.fill = @explosion_colors[(explosion.t / 2).to_i]
-
-      if false
-        @explosions[explosion] ||= TkcImage.new(@canvas, explosion.x / 2, explosion.y / 2)
-        @explosions[explosion].image(boom[explosion.t])
-      end
     end
   end
 
