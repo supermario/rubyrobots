@@ -24,6 +24,9 @@ class Application
     start_battle
   end
 
+  def stop
+  end
+
   private
 
   def load_text_bot
@@ -45,6 +48,10 @@ class Application
       game_over_counter -= 1
     end
     arena.run
+  end
+
+  def game_over_counter
+    @game_over_counter ||= 0
   end
 
   def print_outcome(battlefield)
