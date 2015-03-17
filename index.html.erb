@@ -24,27 +24,42 @@
       }
       textarea {
         font-family: monospace;
+        font-size: 14px;
       }
     </style>
   </head>
   <body>
+    <div id="arena"></div>
     <div id="text">
+      <div>
+      Help Ruby program her robots! Challenge 1 is the Dummy bot. Target practice!
+      </div>
       <textarea cols="50" rows="20" id="brains">
-class MyDuck
+class MyBot
   include Robot
 
-  def tick events
-    turn_radar 5 if time == 0
-    fire 3 unless events['robot_scanned'].empty?
-    turn_gun 10
+  def tick(events)
+    # Write your robot brains in here!
+    fire 20 if robot_scanned?
+    turn_gun 5
   end
 end
       </textarea>
-      <button id='run'>Run!</button>
+      <pre class='commands'>
+Available commands:
+
+fire &lt;strength> (i.e. `fire 1`)
+turn_gun &lt;speed>  (i.e. `turn_gun 2`)
+
+Available events:
+
+- robot_scanned?
+
+      </pre>
+      <button id='run'>Battle!</button>
 
       <pre id="log">Battle report</pre>
     </div>
-    <div id="arena"></div>
     <%= javascript_include_tag 'application' %>
   </body>
 </html>

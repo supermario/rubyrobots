@@ -116,6 +116,10 @@ module Robot
 
   # broadcasts received last turn
   attr_event :broadcasts
+
+  def robot_scanned?
+    !@events['robot_scanned'].empty?
+  end
 end
 
 class RobotRunner
@@ -262,8 +266,6 @@ class RobotRunner
     end
     @robot.events = @events.dup
 
-    # @robot.actions ||= Hash.new(0)
-    # @robot.actions.clear
     @robot.actions = Hash.new(0)
   end
 

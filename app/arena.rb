@@ -39,6 +39,7 @@ class Arena
     @two = `new Two({width: #{xres}, height: #{yres}})`
     @two = Native(@two)
     arena = $document['arena']
+    $document['arena'].inner_html = ""
     @two.appendTo arena
   end
 

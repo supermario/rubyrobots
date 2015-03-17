@@ -6,6 +6,7 @@ require 'browser/interval'
 require 'monkey_patches'
 
 require 'rubyrobots'
+require 'robots/dummy'
 require 'robots/nervous_duck'
 require 'robots/sitting_duck'
 
@@ -17,9 +18,9 @@ class Application
   end
 
   def load_ducks
-    return if started
+    # return if started
     @ducks = []
-    @ducks << SittingDuck
+    @ducks << Dummy
     load_text_bot
     start_battle
   end
@@ -30,9 +31,10 @@ class Application
   private
 
   def load_text_bot
-    eval $document['brains'].inner_html
+    # It seems that $document['brains'].value fails to work, and inner_html doesn't update?
+    eval `document.getElementById('brains').value`
     # @todo Need to parse out class name dynamically
-    @ducks << MyDuck
+    @ducks << MyBot
   end
 
   def run_in_gui(battlefield, xres, yres, speed_multiplier)
