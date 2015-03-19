@@ -84,18 +84,18 @@ html lang="en"
 
           .documentation
             .model Robot Docs
-            .method fire(strength=10)
+            .method fire(strength)
             .desc Shoot with your gun this tick. If gun was recently fired and is still in cool-down, does nothing.
             .examples
-              | fire          # Shoot with max strength, same as 'fire 10'
+              | fire 10       # Shoot with max strength
                 fire 5        # Shoot with mid-strength, shorter cool-down
                 fire 1        # Shoot with lowest strength, shortest cool-down
 
-            .method turn_gun(speed=5)
+            .method turn_gun(speed)
             .desc Turn the gun anti-clockwise at given speed for the next tick.
             .examples
-              | turn_gun      # Turn with mid-speed, same as 'turn_gun 5'
-                turn_gun 10   # Turn with max-speed
+              | turn_gun 10   # Turn with max-speed
+                turn_gun 5    # Turn with mid-speed
                 turn_gun 1    # Turn with min-speed
 
             .method robot_scanned?
