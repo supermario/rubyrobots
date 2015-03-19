@@ -1,3 +1,5 @@
+require 'robot_math'
+
 class Bullet
   attr_accessor :x, :y, :heading, :speed, :energy, :dead, :origin
 

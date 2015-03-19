@@ -1,4 +1,4 @@
-require 'browser'
+# require 'browser'
 
 TkRobot = Struct.new(:body, :gun, :radar, :speech, :info, :status)
 

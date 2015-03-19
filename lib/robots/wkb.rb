@@ -157,9 +157,7 @@ class WKB
       @angle = ANGLE_AWAY
     end
 
-    attr_re
-    ader :direct
-    ion
+    attr_reader :direction
 
     def angle
       @angle * @direction
