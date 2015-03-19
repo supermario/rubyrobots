@@ -3,4 +3,12 @@ source 'https://rubygems.org'
 gem 'opal',         git: 'https://github.com/opal/opal.git'
 gem 'opal-browser', git: 'https://github.com/opal/opal-browser.git'
 
-gem 'shotgun'
+group :development do
+  gem 'shotgun'
+  gem 'guard-rspec'
+end
+
+group :development do
+  gem 'simplecov'
+  gem 'rspec-core'
+end
