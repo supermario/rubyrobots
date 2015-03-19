@@ -3,6 +3,7 @@ require 'opal-parser'
 require 'two'
 require 'browser'
 require 'browser/interval'
+require 'native'
 require 'monkey_patches'
 
 require 'rubyrobots'
@@ -13,7 +14,8 @@ require 'robots/sitting_duck'
 class Application
   attr_accessor :started
 
-  def initialize
+  def initialize(e)
+    @e = e
     @started = false
   end
 
@@ -31,9 +33,7 @@ class Application
   private
 
   def load_text_bot
-    # It seems that $document['brains'].value fails to work, and inner_html doesn't update?
-    eval `document.getElementById('brains').value`
-    # @todo Need to parse out class name dynamically
+    eval @e.getValue
     @ducks << MyBot
   end
 
@@ -106,7 +106,8 @@ class Application
   end
 end
 
-a = Application.new
+e = Native(`editor`)
+a = Application.new(e)
 
 $document['run'].on :click do
   a.load_ducks
