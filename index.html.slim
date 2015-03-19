@@ -2,56 +2,54 @@ doctype html
 html lang="en"
   head
     title RubyRobots
+    link rel='stylesheet' href='http://yui.yahooapis.com/pure/0.6.0/pure-min.css'
     css:
       body {
-        font-family: sans-serif;
+        padding: 20px;
       }
       #log {
         background-color: #f7f7f7;
         border: 1px solid #e0e0e0;
         padding: 1em;
       }
-      #arena, #text {
-        float: left;
-      }
-      #text {
-        width: 390px;
-        margin-right: 10px;
-      }
       #arena svg {
         border: 1px solid #e0e0e0;
-        background-image: url("tiles.png");
+        background-image: url('tiles.png');
       }
       textarea {
         font-family: monospace;
-        font-size: 14px;
+        font-size: 16px
       }
 
   body
-    div#arena
-    div#text
-      div Help Ruby program her robots! Challenge 1 is the Dummy bot. Target practice!
-      textarea#brains cols='50' rows='20'
-        | class MyBot
-            include Robot
+    .pure-g
+      .pure-u-1-2
+        #arena
+      .pure-u-1-2
+        #text
+          p Challenge 1 is the Dummy bot. Target practice!
+          br
+          textarea#brains cols='50' rows='20'
+            | class MyBot
+                include Robot
 
-            def tick(events)
-              # Write your robot brains in here!
-              fire 20 if robot_scanned?
-              turn_gun 5
-            end
-          end
+                def tick(events)
+                  # Write your robot brains in here!
+                  fire 10 if robot_scanned?
+                  turn_gun 5
+                end
+              end
 
-      pre.commands
-        | Available commands:
-          fire &lt;strength> (i.e. `fire 1`)
-          turn_gun &lt;speed>  (i.e. `turn_gun 2`)
+          pre.commands
+            | Available commands:
+              fire &lt;strength>  (1-10)
+              turn_gun &lt;speed> (1-10)
 
-          Available events:
-          - robot_scanned?
+              Available events:
+              (bool) robot_scanned?
 
-      button#run Battle!
+          button#run.pure-button Battle!
 
-      pre#log Battle log:
+    pre#log Battle log:
 
     == javascript_include_tag 'application'
