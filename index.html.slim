@@ -1,79 +1,33 @@
 doctype html
 html lang="en"
   head
-    title RubyRobots
-    link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css'
     meta charset='utf-8'
-    css:
-      body {
-        padding: 20px;
-        background: #0D1F26;
-        color: #ddd;
-        font-size: 15px;
-      }
-      #log {
-        background-color: #002a37;
-        padding: 1em;
-      }
-      #arena svg {
-        background-image: url('tiles.png');
-        width: 400px;
-        height: 400px;
-      }
-      textarea {
-        font-family: Monaco;
-        font-size: 16px;
-        padding: 5px;
-      }
-      #editor {
-        width: 100%;
-        height: 300px;
-        font-size: 14px;
-      }
-      .documentation {
-        padding: 10px 0;
-      }
-      .model {
-        background-color: #003040;
-        padding: 10px;
-        font-weight: bold;
-        font-size: 14px;
-        margin-bottom: 5px;
-      }
-      .method {
-        background-color: #17453C;
-        padding: 8px 10px;
+    title RubyRobots
 
-        font-family: Monaco;
-        font-size: 14px;
-      }
-      .desc {
-        padding: 10px;
-        margin-left: 10px;
-      }
-      .examples {
-        padding: 10px;
-        white-space: pre;
-        background-color: #002a37;
-        color: #92a1a1;
-        font-family: Monaco;
-        font-size: 12px;
-        margin-left: 10px;
-        margin-bottom: 20px;
-      }
+    / Pure
+    link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css'
 
+    / Editor
     script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.8/ace.js' type='text/javascript' charset='utf-8'
     script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.8/theme-solarized_dark.js' type='text/javascript' charset='utf-8'
     script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.8/mode-ruby.js' type='text/javascript' charset='utf-8'
 
-  body
+    / Modals
+    script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"
+    / link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css'
+    / script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"
+    link rel='stylesheet' href='bootstrap.min.css'
+    script src="/bootstrap.min.js"
+
+    / Styles
+    link rel='stylesheet' href='/styles.css'
+
+  body onLoad="$('#modal_intro').modal('show');"
     .pure-g
       .pure-u-1-2
         #arena
       .pure-u-1-2
         #text
-          p Challenge 1: Dummy bot – it doesn't move or shoot. Program your robot to attack and destroy!
-          br
           #editor
             | class MyBot
                 include Robot
@@ -109,6 +63,15 @@ html lang="en"
                 else
                   # No robot was scanned, do something else!
                 end
+
+    #modal_intro.modal.fade
+      .modal-dialog
+        .modal-content
+          .modal-body
+            p Welcome to Ruby Robots!
+            p Your first challenge is the Dummy bot – it doesn't move or shoot. Use the Robot Docs as a guide to write code for your Robot's brain.
+            p Your robot will run these commands repeatedly until your opponent has been defeated.
+            p: button.pure-button type="button" data-dismiss="modal" Ok!
 
     javascript:
       var editor = ace.edit("editor");

@@ -1,0 +1,55 @@
+body {
+  padding: 20px;
+  background: #0D1F26;
+  color: #ddd;
+  font-size: 14px;
+}
+#log {
+  background-color: #002a37;
+  padding: 1em;
+}
+#arena svg {
+  background-image: url('tiles.png');
+  width: 400px;
+  height: 400px;
+}
+#editor {
+  width: 100%;
+  height: 300px;
+  font-size: 14px;
+}
+.documentation {
+  padding: 10px 0;
+}
+.model {
+  background-color: #003040;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.method {
+  background-color: #17453C;
+  padding: 8px 10px;
+
+  font-family: Monaco;
+  font-size: 14px;
+}
+.desc {
+  padding: 10px;
+  margin-left: 10px;
+}
+.examples {
+  padding: 10px;
+  white-space: pre;
+  background-color: #002a37;
+  color: #92a1a1;
+  font-family: Monaco;
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+
+.modal-content {
+  background: #0D1F26;
+  color: #ddd;
+}
