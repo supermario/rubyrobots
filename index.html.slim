@@ -3,6 +3,7 @@ html lang="en"
   head
     title RubyRobots
     link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css'
+    meta charset='utf-8'
     css:
       body {
         padding: 20px;
@@ -71,7 +72,7 @@ html lang="en"
         #arena
       .pure-u-1-2
         #text
-          p Challenge 1 is the Dummy bot. Target practice!
+          p Challenge 1: Dummy bot – it doesn't move or shoot. Program your robot to attack and destroy!
           br
           #editor
             | class MyBot
@@ -108,7 +109,6 @@ html lang="en"
                 else
                   # No robot was scanned, do something else!
                 end
-
 
     javascript:
       var editor = ace.edit("editor");
