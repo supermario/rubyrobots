@@ -19,22 +19,20 @@ class Application
     @started = false
   end
 
-  def load_ducks
+  def load_robots
+    stop_battle
     # return if started
-    @ducks = []
-    @ducks << Dummy
+    @robots = []
+    @robots << Dummy
     load_text_bot
     start_battle
-  end
-
-  def stop
   end
 
   private
 
   def load_text_bot
     eval @e.getValue
-    @ducks << MyBot
+    @robots << MyBot
   end
 
   def run_in_gui(battlefield, xres, yres, speed_multiplier)
@@ -94,15 +92,19 @@ class Application
     speed_multiplier = 1
     timeout = 50_000
 
-    battlefield = Battlefield.new xres * 2, yres * 2, timeout, seed
+    @battlefield = Battlefield.new xres * 2, yres * 2, timeout, seed
 
-    @ducks.each_with_index do |duck, index|
-      battlefield << RobotRunner.new(duck.new, battlefield, index)
+    @robots.each_with_index do |robot, index|
+      @battlefield << RobotRunner.new(robot.new, @battlefield, index)
     end
 
-    puts "Battle started between #{@ducks.join(' and ')}"
+    puts "Battle started between #{@robots.join(' and ')}"
 
-    run_in_gui battlefield, xres, yres, speed_multiplier
+    run_in_gui @battlefield, xres, yres, speed_multiplier
+  end
+
+  def stop_battle
+    @battlefield.stop if !@battlefield.nil?
   end
 end
 
@@ -110,5 +112,5 @@ e = Native(`editor`)
 a = Application.new(e)
 
 $document['run'].on :click do
-  a.load_ducks
+  a.load_robots
 end

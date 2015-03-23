@@ -56,4 +56,8 @@ class Battlefield
       bullets: bullets.map(&:state),
       robots: robots.map(&:state) }
   end
+
+  def stop
+    @time = timeout
+  end
 end
