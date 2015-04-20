@@ -1,6 +1,6 @@
 # require 'browser'
 
-TkRobot = Struct.new(:body, :gun, :radar, :speech, :info, :status)
+TkRobot = Struct.new(:body, :gun, :radar, :speech, :info, :status, :health)
 
 class Arena
   attr_reader :battlefield, :xres, :yres
@@ -140,8 +140,6 @@ class Arena
         robot.radar = radar_group
       end
 
-      # robot.body.rotation = 0
-      # robot.body.translation.set 0, 0
       robot.body.rotation = (90 - ai.heading) / 180.0 * Math::PI
       robot.body.translation.set ai.x / 2, ai.y / 2
 
@@ -150,6 +148,16 @@ class Arena
 
       robot.radar.translation.set ai.x / 2, ai.y / 2
       robot.radar.rotation = (90 - ai.radar_heading) / 180.0 * Math::PI
+
+      # Robot health bars
+      @two.remove robot.health if robot.health
+      health = @two.makeRectangle 0, ai.size / 2, ai.energy / 2, 4
+      health.fill = '#1e8ad1'
+      health_bg = @two.makeRectangle 0, ai.size / 2, 50, 4
+      health_bg.fill = '#666'
+
+      robot.health = @two.makeGroup health_bg, health
+      robot.health.translation.set ai.x / 2, ai.y / 2
 
     end
   end
