@@ -108,9 +108,21 @@ class Application
   end
 end
 
-e = Native(`editor`)
-a = Application.new(e)
+editor = Native(`ace`).edit 'editor'
+editor.setTheme 'ace/theme/solarized_dark'
+editor.getSession.setMode 'ace/mode/ruby'
+
+a = Application.new(editor)
 
 $document['run'].on :click do
   a.load_robots
 end
+
+editor.commands.addCommand({
+  name: 'execute',
+  bindKey: { win: 'Ctrl-S',  mac: 'Command-S' },
+  exec: ->(editor) {
+    a.load_robots
+  },
+  readOnly: true
+})
