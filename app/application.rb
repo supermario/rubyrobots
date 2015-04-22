@@ -1,5 +1,6 @@
-require 'opal'
-require 'opal-parser'
+# require 'opal'
+# require 'opal-parser'
+
 require 'two'
 require 'browser'
 require 'browser/interval'
