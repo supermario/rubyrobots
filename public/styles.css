@@ -8,8 +8,8 @@ body {
   background-color: #002a37;
   padding: 1em;
 }
-#arena svg {
-  background-image: url('tiles.png');
+#arena, #arena svg {
+  background-image: url('/public/tiles.png');
   width: 400px;
   height: 400px;
 }
