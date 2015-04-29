@@ -68,7 +68,7 @@ class RobotRunner
   end
 
   def set_action_limits
-    @fire_min, @fire_max = 0, 3
+    @fire_min, @fire_max = 0, 10
     @turn_min, @turn_max = -10, 10
     @turn_gun_min, @turn_gun_max = -30, 30
     @turn_radar_min, @turn_radar_max = -60, 60
@@ -160,7 +160,7 @@ class RobotRunner
       @battlefield << bullet
       @gun_heat = @actions[:fire]
     end
-    @gun_heat -= 0.1
+    @gun_heat -= 0.2
     @gun_heat = 0 if @gun_heat < 0
   end
 
