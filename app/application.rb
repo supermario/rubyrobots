@@ -5,7 +5,7 @@ require 'two'
 require 'browser'
 require 'browser/interval'
 require 'native'
-require 'monkey_patches'
+require 'core_extensions/kernel'
 
 require 'rubyrobots'
 require 'robots/dummy'
